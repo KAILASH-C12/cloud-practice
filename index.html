@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Griflan Labs · Clone</title>
+
+  <!-- ===== LIBRARIES ===== -->
+  <!-- GSAP & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <!-- Motion One (Framer Motion vanilla) -->
+  <script src="https://cdn.jsdelivr.net/npm/motion@10.16.4/dist/motion.min.js"></script>
+  <!-- Matter.js for physics -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+
+  <style>
+    /* ===== RESET & VARIABLES ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #181616;          /* original dark background */
+      --text: #f0f0f0;
+      --accent: #ff3b3b;      /* Griflan red */
+      --accent-soft: #ff3b3b33;
+      --gray: #2a2a2a;
+      --border: #2e2e2e;
+      --font-sans: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+      --font-mono: 'Roboto Mono', monospace;
+    }
+
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&family=Roboto+Mono:wght@500&display=swap');
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== PRELOADER ===== */
+    #preloader {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      gap: 2rem;
+    }
+
+    .loader-letters {
+      display: flex;
+      gap: 0.05em;
+      font-size: clamp(3rem, 10vw, 7rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+      overflow: hidden;
+    }
+
+    .loader-letters span {
+      display: inline-block;
+      transform: translateY(100%);
+      opacity: 0;
+    }
+
+    .loader-bar {
+      width: 220px;
+      height: 3px;
+      background: var(--gray);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .loader-bar-inner {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 3px;
+    }
+
+    /* ===== CANVAS BACKGROUND (WebGPU-style particle simulation) ===== */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .content {
+      position: relative;
+      z-index: 1;
+      padding: 0 5vw;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2rem 0;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+    }
+
+    .logo img {
+      height: 32px;
+      width: auto;
+      display: block;
+    }
+
+    nav a {
+      color: var(--text);
+      text-decoration: none;
+      margin-left: 2.5rem;
+      position: relative;
+      transition: color 0.3s;
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      transition: width 0.4s cubic-bezier(0.77, 0, 0.18, 1);
+    }
+
+    nav a:hover {
+      color: var(--accent);
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 4rem 0;
+    }
+
+    .hero h1 {
+      font-size: clamp(3.5rem, 12vw, 10rem);
+      font-weight: 900;
+      line-height: 0.92;
+      letter-spacing: -0.04em;
+      text-transform: uppercase;
+      max-width: 14ch;
+      overflow: hidden;
+    }
+
+    .hero h1 .line {
+      display: block;
+      overflow: hidden;
+    }
+
+    .hero h1 .line span {
+      display: inline-block;
+      transform: translateY(110%);
+    }
+
+    .hero-sub {
+      margin-top: 2.5rem;
+      max-width: 45ch;
+      font-size: 1.1rem;
+      line-height: 1.7;
+      color: #b0b0b0;
+      opacity: 0;
+    }
+
+    .hero-cta {
+      margin-top: 2.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-size: 0.9rem;
+      color: var(--text);
+      text-decoration: none;
+      opacity: 0;
+    }
+
+    .hero-cta .arrow {
+      display: inline-block;
+      transition: transform 0.4s cubic-bezier(0.77, 0, 0.18, 1);
+    }
+
+    .hero-cta:hover .arrow {
+      transform: translateX(8px);
+    }
+
+    /* ===== MARQUEE ===== */
+    .marquee-section {
+      padding: 3rem 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .marquee {
+      display: inline-block;
+      animation: marquee 20s linear infinite;
+    }
+
+    .marquee span {
+      font-size: clamp(1.5rem, 4vw, 3rem);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      margin-right: 2rem;
+      color: var(--text);
+    }
+
+    .marquee span.outline {
+      -webkit-text-stroke: 1px var(--text);
+      color: transparent;
+    }
+
+    @keyframes marquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    /* ===== SERVICE ROWS (Griflan Hover Effect) ===== */
+    .services {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      padding: 4rem 0;
+    }
+
+    .service {
+      position: relative;
+      height: 16vh;
+      min-height: 120px;
+      border-top: 1px solid var(--border);
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color 0.3s;
+      will-change: height;
+    }
+
+    .service:last-child {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .service-name {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 2vw;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .service-name h1 {
+      font-size: clamp(2.5rem, 7vw, 6rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -0.03em;
+      color: var(--accent); /* red as per original */
+      transition: color 0.3s;
+    }
+
+    .service-images {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5vw;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0;
+      transform: translateY(100%);
+    }
+
+    .service-images .img {
+      width: 18vw;
+      max-width: 240px;
+      aspect-ratio: 3/4;
+      background: var(--gray);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    .service-images .img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Tags container for physics */
+    .tags-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .tag {
+      position: absolute;
+      padding: 0.4rem 1rem;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-radius: 40px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transform: scale(0.8);
+    }
+
+    /* ===== PROJECT GRID ===== */
+    .work-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      padding: 6rem 0;
+    }
+
+    .project-card {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      background: var(--gray);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: transform 0.4s ease, box-shadow 0.4s ease;
+    }
+
+    .project-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    .project-card .card-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d1b1b 100%);
+      transition: transform 0.6s cubic-bezier(0.77, 0, 0.18, 1);
+    }
+
+    .project-card:hover .card-bg {
+      transform: scale(1.08);
+    }
+
+    .project-card .card-content {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 2rem;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+      transform: translateY(10px);
+      transition: transform 0.4s ease;
+    }
+
+    .project-card:hover .card-content {
+      transform: translateY(0);
+    }
+
+    .project-card .card-tag {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .project-card h3 {
+      font-size: 1.6rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      padding: 4rem 0 3rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    footer h2 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      text-transform: uppercase;
+    }
+
+    footer .footer-cta {
+      font-size: 1rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      border-bottom: 2px solid transparent;
+      transition: border-color 0.3s;
+    }
+
+    footer .footer-cta:hover {
+      border-color: var(--accent);
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      nav a {
+        margin-left: 1.2rem;
+        font-size: 0.75rem;
+      }
+      .work-grid {
+        grid-template-columns: 1fr;
+      }
+      .service-images .img {
+        width: 28vw;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== PRELOADER ===== -->
+  <div id="preloader">
+    <div class="loader-letters">
+      <span>G</span><span>R</span><span>I</span><span>F</span><span>L</span><span>A</span><span>N</span>
+    </div>
+    <div class="loader-bar">
+      <div class="loader-bar-inner"></div>
+    </div>
+  </div>
+
+  <!-- ===== CANVAS BACKGROUND ===== -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <div class="content">
+    <header>
+      <div class="logo">
+        <img src="https://labs.griflan.com/logo.svg?v=3" alt="Griflan Labs">
+      </div>
+      <nav>
+        <a href="#">Work</a>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+      </nav>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero">
+      <h1>
+        <span class="line"><span>Big Idea?</span></span>
+        <span class="line"><span>We Build It.</span></span>
+      </h1>
+      <p class="hero-sub">
+        Griflan Labs is an experimental, bird's-eye view of our work — a fresh way to show the range of brands, digital experiences, and products we create through the Griflan lens.
+      </p>
+      <a href="#" class="hero-cta">
+        Schedule a call <span class="arrow">→</span>
+      </a>
+    </section>
+
+    <!-- MARQUEE -->
+    <section class="marquee-section">
+      <div class="marquee">
+        <span>Branding</span>
+        <span class="outline">Illustration</span>
+        <span>Web Design</span>
+        <span class="outline">Motion</span>
+        <span>3D Animation</span>
+        <span class="outline">Strategy</span>
+        <span>Packaging</span>
+        <span class="outline">Digital</span>
+        <!-- duplicate for seamless loop -->
+        <span>Branding</span>
+        <span class="outline">Illustration</span>
+        <span>Web Design</span>
+        <span class="outline">Motion</span>
+        <span>3D Animation</span>
+        <span class="outline">Strategy</span>
+        <span>Packaging</span>
+        <span class="outline">Digital</span>
+      </div>
+    </section>
+
+    <!-- SERVICE ROWS (Griflan Hover Effect) -->
+    <section class="services">
+      <div class="service" data-tags="Editorial, Fashion Identity, Monochrome, Shadow Play, Minimalism, Studio Portraits">
+        <div class="service-name"><h1>Silhouette</h1></div>
+        <div class="service-images">
+          <div class="img"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=400&fit=crop&auto=format" alt="Silhouette 1"></div>
+          <div class="img"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=400&fit=crop&auto=format" alt="Silhouette 2"></div>
+          <div class="img"><img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=300&h=400&fit=crop&auto=format" alt="Silhouette 3"></div>
+        </div>
+        <div class="tags-container"></div>
+      </div>
+      <div class="service" data-tags="Color Theory, Graphics, Poster Design, Saturation, Pop Art, Visual Energy">
+        <div class="service-name"><h1>Chroma</h1></div>
+        <div class="service-images">
+          <div class="img"><img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=300&h=400&fit=crop&auto=format" alt="Chroma 1"></div>
+          <div class="img"><img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=300&h=400&fit=crop&auto=format" alt="Chroma 2"></div>
+          <div class="img"><img src="https://images.unsplash.com/photo-1550859492-d5da9d8e45f3?w=300&h=400&fit=crop&auto=format" alt="Chroma 3"></div>
+        </div>
+        <div class="tags-container"></div>
+      </div>
+      <div class="service" data-tags="Character Design, Portraits, Visual Storytelling, Emotion, Identity, Artistic Direction">
+        <div class="service-name"><h1>Persona</h1></div>
+        <div class="service-images">
+          <div class="img"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=300&h=400&fit=crop&auto=format" alt="Persona 1"></div>
+          <div class="img"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop&auto=format" alt="Persona 2"></div>
+          <div class="img"><img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=300&h=400&fit=crop&auto=format" alt="Persona 3"></div>
+        </div>
+        <div class="tags-container"></div>
+      </div>
+    </section>
+
+    <!-- PROJECT GRID -->
+    <section class="work-grid">
+      <div class="project-card">
+        <div class="card-bg"></div>
+        <div class="card-content">
+          <div class="card-tag">Web Design</div>
+          <h3>MindJoin</h3>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="card-bg"></div>
+        <div class="card-content">
+          <div class="card-tag">3D Animation</div>
+          <h3>Saffron Finance</h3>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="card-bg"></div>
+        <div class="card-content">
+          <div class="card-tag">Brand Identity</div>
+          <h3>Five Pathways</h3>
+        </div>
+      </div>
+      <div class="project-card">
+        <div class="card-bg"></div>
+        <div class="card-content">
+          <div class="card-tag">Motion Design</div>
+          <h3>Hugo</h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <h2>Big idea?<br>You know where to find us.</h2>
+      <a href="#" class="footer-cta">Get in touch →</a>
+    </footer>
+  </div>
+
+  <script>
+    // ============================================================
+    // 1. PRELOADER (GSAP)
+    // ============================================================
+    const preloader = document.getElementById('preloader');
+    const loaderLetters = document.querySelectorAll('.loader-letters span');
+    const loaderBarInner = document.querySelector('.loader-bar-inner');
+
+    const preloaderTL = gsap.timeline();
+
+    preloaderTL
+      .to(loaderLetters, {
+        y: 0,
+        opacity: 1,
+        duration: 0.8,
+        stagger: 0.08,
+        ease: 'power3.out'
+      })
+      .to(loaderBarInner, {
+        width: '100%',
+        duration: 1.2,
+        ease: 'power2.inOut'
+      }, '-=0.4')
+      .to(preloader, {
+        opacity: 0,
+        duration: 0.6,
+        delay: 0.3,
+        onComplete: () => {
+          preloader.style.display = 'none';
+          initHeroAnimations();
+        }
+      });
+
+    // ============================================================
+    // 2. HERO ANIMATIONS (GSAP + Motion One)
+    // ============================================================
+    function initHeroAnimations() {
+      const heroLines = document.querySelectorAll('.hero h1 .line span');
+      const heroSub = document.querySelector('.hero-sub');
+      const heroCta = document.querySelector('.hero-cta');
+
+      // GSAP for headline reveal
+      gsap.to(heroLines, {
+        y: 0,
+        duration: 1.2,
+        stagger: 0.15,
+        ease: 'power4.out'
+      });
+
+      // Motion One for subheadline (Framer Motion vanilla)
+      if (window.Motion) {
+        const { animate } = window.Motion;
+        animate(heroSub, { opacity: [0, 1], y: [20, 0] }, { duration: 0.8, delay: 0.6, easing: 'ease-out' });
+        animate(heroCta, { opacity: [0, 1], y: [20, 0] }, { duration: 0.6, delay: 0.9, easing: 'ease-out' });
+      } else {
+        // fallback
+        gsap.to(heroSub, { opacity: 1, y: 0, duration: 0.8, delay: 0.6 });
+        gsap.to(heroCta, { opacity: 1, y: 0, duration: 0.6, delay: 0.9 });
+      }
+    }
+
+    // ============================================================
+    // 3. SCROLL-TRIGGERED PROJECT CARDS (GSAP ScrollTrigger)
+    // ============================================================
+    gsap.registerPlugin(ScrollTrigger);
+
+    gsap.utils.toArray('.project-card').forEach((card, i) => {
+      gsap.to(card, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: card,
+          start: 'top 85%',
+          toggleActions: 'play none none none'
+        },
+        delay: i * 0.1
+      });
+    });
+
+    // ============================================================
+    // 4. CANVAS BACKGROUND (particle network, simulating WebGPU)
+    // ============================================================
+    const canvas = document.getElementById('bg-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animationId;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function createParticles() {
+      const count = Math.min(120, Math.floor((canvas.width * canvas.height) / 12000));
+      particles = [];
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 1.8 + 0.4,
+          speedX: (Math.random() - 0.5) * 0.3,
+          speedY: (Math.random() - 0.5) * 0.3,
+          opacity: Math.random() * 0.5 + 0.1
+        });
+      }
+    }
+
+    function drawParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach(p => {
+        p.x += p.speedX;
+        p.y += p.speedY;
+        if (p.x < 0) p.x = canvas.width;
+        if (p.x > canvas.width) p.x = 0;
+        if (p.y < 0) p.y = canvas.height;
+        if (p.y > canvas.height) p.y = 0;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 59, 59, ${p.opacity})`;
+        ctx.fill();
+      });
+
+      // connecting lines
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < 120) {
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.strokeStyle = `rgba(255, 59, 59, ${0.08 * (1 - dist / 120)})`;
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+          }
+        }
+      }
+
+      animationId = requestAnimationFrame(drawParticles);
+    }
+
+    function initCanvas() {
+      resizeCanvas();
+      createParticles();
+      drawParticles();
+    }
+
+    window.addEventListener('resize', () => {
+      resizeCanvas();
+      createParticles();
+    });
+
+    initCanvas();
+
+    // ============================================================
+    // 5. GRIFLAN HOVER EFFECT (Elastic Service Rows + Physics Tags)
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', () => {
+      const services = document.querySelectorAll('.service');
+
+      services.forEach(service => {
+        const serviceName = service.querySelector('.service-name h1');
+        const serviceImages = service.querySelector('.service-images');
+        const tagsContainer = service.querySelector('.tags-container');
+        const tagsData = service.dataset.tags ? service.dataset.tags.split(',') : [];
+
+        // Create tag elements (initially hidden)
+        const tagEls = tagsData.map(text => {
+          const el = document.createElement('div');
+          el.className = 'tag';
+          el.textContent = text.trim();
+          tagsContainer.appendChild(el);
+          return el;
+        });
+
+        // Matter.js engine for this service (created on hover)
+        let engine = null;
+        let runner = null;
+
+        // Hover in
+        service.addEventListener('mouseenter', () => {
+          // 1. Elastic expand of row height
+          gsap.to(service, {
+            height: '36vh',
+            duration: 0.8,
+            ease: 'elastic.out(1, 0.5)'
+          });
+
+          // 2. Images slide up
+          gsap.to(serviceImages, {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: 'power3.out',
+            delay: 0.1
+          });
+
+          // 3. Title color change red -> cream
+          gsap.to(serviceName, {
+            color: '#f0f0f0',
+            duration: 0.4,
+            ease: 'power2.out'
+          });
+
+          // 4. Physics tags drop after 0.2s
+          setTimeout(() => {
+            if (engine) {
+              Matter.Engine.clear(engine);
+              Matter.Runner.stop(runner);
+            }
+
+            // Setup Matter.js
+            const { Engine, Runner, Bodies, Composite } = Matter;
+            engine = Engine.create();
+            const world = engine.world;
+
+            const rowWidth = service.clientWidth;
+            const rowHeight = service.clientHeight;
+            const floorY = rowHeight - 20;
+
+            // Invisible floor
+            const floor = Bodies.rectangle(rowWidth / 2, floorY + 10, rowWidth, 20, {
+              isStatic: true,
+              render: { visible: false }
+            });
+            Composite.add(world, floor);
+
+            // Create bodies for each tag
+            tagEls.forEach((el, index) => {
+              // Set initial position near top center
+              const startX = rowWidth / 2 + (Math.random() - 0.5) * 200;
+              const startY = 20;
+
+              // Create a rectangle body for the tag
+              const body = Bodies.rectangle(startX, startY, 120, 30, {
+                restitution: 0.6,
+                friction: 0.4,
+                render: { visible: false }
+              });
+              Composite.add(world, body);
+
+              // Store body reference on element
+              el._body = body;
+
+              // Show tag with GSAP (fade in + scale)
+              gsap.to(el, {
+                opacity: 1,
+                scale: 1,
+                duration: 0.4,
+                delay: index * 0.05,
+                ease: 'back.out(2)'
+              });
+
+              // Update tag position in animation loop
+              function updateTagPosition() {
+                if (el._body) {
+                  const { x, y } = el._body.position;
+                  el.style.left = (x - 60) + 'px'; // offset half width
+                  el.style.top = (y - 15) + 'px';  // offset half height
+                }
+                requestAnimationFrame(updateTagPosition);
+              }
+              updateTagPosition();
+            });
+
+            runner = Runner.create();
+            Runner.run(runner, engine);
+          }, 200);
+        });
+
+        // Hover out
+        service.addEventListener('mouseleave', () => {
+          // 1. Spring row closed
+          gsap.to(service, {
+            height: '16vh',
+            duration: 0.8,
+            ease: 'elastic.out(1, 0.5)'
+          });
+
+          // 2. Images slide down
+          gsap.to(serviceImages, {
+            opacity: 0,
+            y: '100%',
+            duration: 0.5,
+            ease: 'power3.in'
+          });
+
+          // 3. Title color back to red
+          gsap.to(serviceName, {
+            color: 'var(--accent)',
+            duration: 0.4
+          });
+
+          // 4. Fade out tags and stop physics
+          tagEls.forEach(el => {
+            gsap.to(el, { opacity: 0, scale: 0.8, duration: 0.3 });
+            el._body = null;
+          });
+
+          if (engine) {
+            Matter.Engine.clear(engine);
+            Matter.Runner.stop(runner);
+            engine = null;
+          }
+        });
+      });
+    });
+
+    // ============================================================
+    // 6. MARQUEE (GSAP infinite scroll enhancement)
+    // ============================================================
+    // The CSS animation already handles it, but we can add a GSAP-powered
+    // fallback if needed. We'll keep CSS for performance.
+
+    // ============================================================
+    // 7. CUSTOM CURSOR (optional, using Motion One)
+    // ============================================================
+    if (window.Motion) {
+      const { animate } = window.Motion;
+      const cursor = document.createElement('div');
+      cursor.style.cssText = `
+        position: fixed;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--accent);
+        pointer-events: none;
+        z-index: 9999;
+        mix-blend-mode: difference;
+        transition: transform 0.2s;
+      `;
+      document.body.appendChild(cursor);
+
+      document.addEventListener('mousemove', (e) => {
+        animate(cursor, { x: e.clientX - 10, y: e.clientY - 10 }, { duration: 0.2 });
+      });
+    }
+  </script>
+</body>
+</html>
