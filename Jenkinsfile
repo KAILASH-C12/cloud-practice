@@ -59,8 +59,9 @@ pipeline {
                         for ($i = 0; $i -lt 10; $i++) {
                             try {
                                 $response = Invoke-WebRequest `
-                                    http://127.0.0.1:18080/ `
-                                    -TimeoutSec 3
+                                -Uri "http://127.0.0.1:18080/" `
+                                -UseBasicParsing `
+                                -TimeoutSec 3
 
                                 if ($response.StatusCode -eq 200) {
                                     $healthy = $true
