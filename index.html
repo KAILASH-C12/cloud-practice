@@ -2,81 +2,76 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#08080c">
-  <title>Griflan Labs · Future Systems</title>
-
-  <!-- ===== FONTS ===== -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>GRIFLAN LABS — Speculative & Brand Systems</title>
+  
+  <!-- Fonts: Serif Editorial, Modern Sans, and Technical Monospace -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-  <!-- ===== LIBRARIES ===== -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/bundled/lenis.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
     /* ============================================================
-       RESET & VARIABLES
+       DESIGN SYSTEM VARIABLES & CORE
     ============================================================ */
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
-      --bg: #08080c;
-      --surface: #101017;
-      --text: #f2ede3;
-      --muted: #8b8b95;
-      --accent: #ff3b30;
-      --cyan: #6ef2ff;
-      --border: rgba(242, 237, 227, 0.09);
-      --font: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-      --mono: 'Roboto Mono', monospace;
-      --serif: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+      --bg: #121111;
+      --bg-panel: #181717;
+      --border: rgba(246, 241, 220, 0.14);
+      --border-bright: rgba(246, 241, 220, 0.4);
+      --text: #f6f1dc;
+      --text-muted: rgba(246, 241, 220, 0.6);
+      --accent: #ff3322;
+      --accent-glow: rgba(255, 51, 34, 0.45);
+      --cyan: #38ef7d;
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
     }
 
-    html { -webkit-text-size-adjust: 100%; }
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+    }
 
     body {
-      background: var(--bg);
+      background-color: var(--bg);
       color: var(--text);
-      font-family: var(--font);
-      overflow-x: hidden;
-      cursor: none;
+      font-family: var(--font-sans);
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
 
-    body.loading { overflow: hidden; }
-
-    /* Ambient gradient glows */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      z-index: 0;
+    /* Subtle CRT Scanline / Texture Overlay */
+    .scanlines {
+      background: linear-gradient(
+        to bottom,
+        rgba(255,255,255,0),
+        rgba(255,255,255,0) 50%,
+        rgba(0, 0, 0, 0.28) 50%,
+        rgba(0, 0, 0, 0.28)
+      );
+      background-size: 100% 4px;
       pointer-events: none;
-      background:
-        radial-gradient(700px circle at 12% 8%, rgba(255, 59, 48, 0.10), transparent 60%),
-        radial-gradient(800px circle at 88% 85%, rgba(110, 242, 255, 0.07), transparent 60%);
     }
 
-    /* Film grain overlay */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      z-index: 9998;
+    /* Vintage vignette */
+    .vignette {
+      background: radial-gradient(circle at 50% 40%, transparent 40%, rgba(10, 9, 9, 0.85) 100%);
       pointer-events: none;
-      opacity: 0.035;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     }
-
-    ::selection { background: var(--accent); color: #fff; }
 
     /* ============================================================
-       PRELOADER
+       PRELOADER OVERLAY
     ============================================================ */
     #preloader {
       position: fixed;
@@ -87,1633 +82,1102 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 2.2rem;
+      transition: opacity 0.8s cubic-bezier(0.85, 0, 0.15, 1), visibility 0.8s ease;
     }
 
-    .loader-letters {
-      display: flex;
-      gap: 0.04em;
-      font-size: clamp(2.6rem, 9vw, 6.5rem);
-      font-weight: 900;
-      letter-spacing: -0.04em;
-      text-transform: uppercase;
-      overflow: hidden;
-      color: var(--text);
-    }
-
-    .loader-letters span {
+    .loader-title span {
       display: inline-block;
-      transform: translateY(105%);
       opacity: 0;
-      will-change: transform;
+      transform: translateY(35px) rotate(4deg);
+      animation: letterReveal 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
     }
 
-    .loader-bar {
-      width: 220px;
-      height: 2px;
-      background: rgba(242, 237, 227, 0.12);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .loader-bar-inner {
-      height: 100%;
-      width: 0%;
-      background: var(--accent);
-      box-shadow: 0 0 14px var(--accent);
-      border-radius: 2px;
-    }
-
-    .loader-caption {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--muted);
+    @keyframes letterReveal {
+      to {
+        opacity: 1;
+        transform: translateY(0) rotate(0deg);
+      }
     }
 
     /* ============================================================
-       CUSTOM CURSOR
+       GRID SYSTEM HEADER & FRAMING
     ============================================================ */
-    .cursor-dot, .cursor-ring {
-      position: fixed;
-      top: 0; left: 0;
-      pointer-events: none;
-      z-index: 9999;
-      border-radius: 50%;
-      will-change: transform;
-    }
-
-    .cursor-dot {
-      width: 6px; height: 6px;
-      background: var(--accent);
-      box-shadow: 0 0 12px var(--accent);
-    }
-
-    .cursor-ring {
-      width: 38px; height: 38px;
-      border: 1px solid rgba(242, 237, 227, 0.35);
-      transition: width 0.35s cubic-bezier(0.16,1,0.3,1),
-                  height 0.35s cubic-bezier(0.16,1,0.3,1),
-                  border-color 0.35s, background 0.35s;
-    }
-
-    body.hovering .cursor-ring {
-      width: 68px; height: 68px;
-      border-color: var(--accent);
-      background: rgba(255, 59, 48, 0.08);
-    }
-
-    /* ============================================================
-       NAVIGATION
-    ============================================================ */
-    .nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 200;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 22px 5vw;
-      border-bottom: 1px solid transparent;
-      transition: background 0.45s ease, backdrop-filter 0.45s ease,
-                  border-color 0.45s ease, padding 0.45s ease;
-    }
-
-    .nav.scrolled {
-      padding: 14px 5vw;
-      background: rgba(8, 8, 12, 0.65);
-      backdrop-filter: blur(18px) saturate(1.4);
-      -webkit-backdrop-filter: blur(18px) saturate(1.4);
-      border-bottom-color: var(--border);
-    }
-
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-      color: var(--text);
-      font-weight: 800;
-      font-size: 17px;
-      letter-spacing: -0.01em;
-      text-transform: uppercase;
-    }
-
-    .nav-logo .logo-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 14px var(--accent);
-      animation: dot-pulse 2.4s ease-in-out infinite;
-    }
-
-    @keyframes dot-pulse {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(0.6); opacity: 0.6; }
-    }
-
-    .nav-logo .logo-em {
-      font-family: var(--serif);
-      font-style: italic;
-      font-weight: 400;
-      text-transform: none;
-      font-size: 21px;
-      letter-spacing: -0.01em;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 38px;
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .nav-links a {
-      color: var(--muted);
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      position: relative;
-      padding: 4px 0;
-      transition: color 0.3s ease;
-    }
-
-    .nav-links a::after {
-      content: '';
-      position: absolute;
-      left: 0; bottom: 0;
-      width: 100%; height: 1px;
-      background: var(--accent);
-      transform: scaleX(0);
-      transform-origin: right;
-      transition: transform 0.45s cubic-bezier(0.77, 0, 0.18, 1);
-    }
-
-    .nav-links a:hover { color: var(--text); }
-    .nav-links a:hover::after { transform: scaleX(1); transform-origin: left; }
-
-    .nav-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 24px;
-      background: var(--accent);
-      color: #fff;
-      text-decoration: none;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      border-radius: 100px;
-      transition: box-shadow 0.35s ease, background 0.35s ease;
-      will-change: transform;
-    }
-
-    .nav-cta:hover {
-      background: #ff5048;
-      box-shadow: 0 10px 34px rgba(255, 59, 48, 0.4);
-    }
-
-    .nav-cta svg { transition: transform 0.35s ease; }
-    .nav-cta:hover svg { transform: translateX(4px); }
-
-    /* ============================================================
-       HERO
-    ============================================================ */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 140px 5vw 100px;
-      position: relative;
-      z-index: 1;
-    }
-
-    .hero-title {
-      font-size: clamp(3rem, 11.5vw, 11rem);
-      font-weight: 900;
-      line-height: 0.88;
-      letter-spacing: -0.05em;
-      text-transform: uppercase;
-    }
-
-    .line {
-      display: block;
-      overflow: hidden;
-      padding-bottom: 0.06em;
-      margin-bottom: -0.06em;
-    }
-
-    .word {
-      display: inline-block;
-      transform: translateY(110%);
-      will-change: transform;
-    }
-
-    .word.serif {
-      font-family: var(--serif);
-      font-style: italic;
-      font-weight: 400;
-      letter-spacing: -0.02em;
-      text-transform: none;
-    }
-
-    .hero-sub {
-      margin-top: 2.6rem;
-      max-width: 46ch;
-      font-size: clamp(0.95rem, 1.2vw, 1.1rem);
-      line-height: 1.75;
-      color: var(--muted);
-      font-weight: 300;
-    }
-
-    .hero-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 2.4rem;
-      margin-top: 3.4rem;
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: rgba(242, 237, 227, 0.4);
-    }
-
-    .hero-meta strong { color: var(--cyan); font-weight: 500; }
-
-    .scroll-hint {
-      position: absolute;
-      right: 5vw;
-      bottom: 48px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(242, 237, 227, 0.45);
-      writing-mode: vertical-rl;
-    }
-
-    .scroll-hint::after {
-      content: '';
-      width: 1px;
-      height: 56px;
-      background: linear-gradient(to bottom, var(--accent), transparent);
-      animation: hint-slide 2s ease-in-out infinite;
-    }
-
-    @keyframes hint-slide {
-      0%, 100% { transform: scaleY(1); transform-origin: top; opacity: 1; }
-      50% { transform: scaleY(0.4); transform-origin: top; opacity: 0.4; }
-    }
-
-    /* ============================================================
-       MARQUEE
-    ============================================================ */
-    .marquee-section {
-      border-top: 1px solid var(--border);
+    .header-cell {
+      border-right: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-      padding: 26px 0;
-      overflow: hidden;
-      white-space: nowrap;
-      position: relative;
-      z-index: 1;
-    }
-
-    .marquee {
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      animation: marquee 32s linear infinite;
-      will-change: transform;
+      position: relative;
+      background: rgba(18, 17, 17, 0.75);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: background 0.25s ease;
     }
 
-    .marquee span {
-      font-size: clamp(15px, 1.6vw, 20px);
-      font-weight: 600;
-      text-transform: uppercase;
+    .nav-btn {
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 11px;
       letter-spacing: 0.12em;
-      color: var(--muted);
-      margin-right: 56px;
+      text-transform: uppercase;
+      transition: color 0.2s ease, background 0.2s ease;
     }
-
-    .marquee span::after {
-      content: '✦';
+    .nav-btn:hover {
       color: var(--accent);
-      font-size: 11px;
-      margin-left: 56px;
-      vertical-align: middle;
-    }
-
-    @keyframes marquee {
-      from { transform: translateX(0); }
-      to { transform: translateX(-50%); }
+      background: rgba(255, 51, 34, 0.05);
     }
 
     /* ============================================================
-       GLOBE SECTION
+       3D STAGE & DRAGGABLE TILE FLOOR
     ============================================================ */
-    .globe-section {
-      min-height: 100vh;
+    .stage-container {
+      perspective: 1200px;
+      perspective-origin: 50% 30%;
+      height: calc(100vh - 130px);
       position: relative;
       overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 120px 0;
-      z-index: 1;
-    }
-
-    .globe-head {
-      position: absolute;
-      top: 120px;
-      left: 5vw;
-      z-index: 10;
-      max-width: 420px;
-    }
-
-    .label {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.24em;
-      text-transform: uppercase;
-      color: var(--accent);
-    }
-
-    .label::before {
-      content: '';
-      width: 30px;
-      height: 1px;
-      background: var(--accent);
-    }
-
-    .globe-head h2 {
-      margin-top: 20px;
-      font-size: clamp(2.2rem, 4.4vw, 3.8rem);
-      font-weight: 800;
-      line-height: 0.95;
-      letter-spacing: -0.045em;
-      text-transform: uppercase;
-    }
-
-    .globe-head h2 em {
-      font-family: var(--serif);
-      font-style: italic;
-      font-weight: 400;
-      text-transform: none;
-      letter-spacing: -0.02em;
-    }
-
-    .hint {
-      margin-top: 22px;
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .hint .pulse {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--cyan);
-      box-shadow: 0 0 10px var(--cyan);
-      animation: dot-pulse 2s ease-in-out infinite;
-    }
-
-    /* 3D stage */
-    .globe-stage {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      perspective: 1600px;
-      touch-action: none;
       cursor: grab;
+      touch-action: none;
     }
 
-    .globe-stage:active { cursor: grabbing; }
+    .stage-container:active {
+      cursor: grabbing;
+    }
 
-    .globe-glow {
+    /* Isometric Grid lines etched in infinite background */
+    .grid-lines {
       position: absolute;
-      width: 58vmin;
-      height: 58vmin;
-      border-radius: 50%;
-      background: radial-gradient(circle,
-        rgba(255, 59, 48, 0.18) 0%,
-        rgba(110, 242, 255, 0.06) 45%,
-        transparent 70%);
-      filter: blur(50px);
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      background-image: 
+        linear-gradient(to right, rgba(246, 241, 220, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(246, 241, 220, 0.04) 1px, transparent 1px);
+      background-size: 50px 50px;
+      transform: rotateX(54deg) translateZ(-60px);
       pointer-events: none;
     }
 
-    .globe-ring {
+    .plane-canvas {
       position: absolute;
-      top: 50%; left: 50%;
-      border-radius: 50%;
-      pointer-events: none;
-      transform-style: preserve-3d;
-    }
-
-    .ring-1 {
-      width: 660px; height: 660px;
-      margin: -330px 0 0 -330px;
-      border: 1px solid rgba(110, 242, 255, 0.10);
-      animation: orbit-a 40s linear infinite;
-    }
-
-    .ring-2 {
-      width: 820px; height: 820px;
-      margin: -410px 0 0 -410px;
-      border: 1px solid rgba(255, 59, 48, 0.08);
-      animation: orbit-b 60s linear infinite;
-    }
-
-    @keyframes orbit-a {
-      from { transform: rotateX(74deg) rotateZ(0deg); }
-      to { transform: rotateX(74deg) rotateZ(360deg); }
-    }
-
-    @keyframes orbit-b {
-      from { transform: rotateX(74deg) rotateZ(360deg) rotateY(20deg); }
-      to { transform: rotateX(74deg) rotateZ(0deg) rotateY(20deg); }
-    }
-
-    .globe-inner {
-      position: relative;
-      width: 0; height: 0;
+      top: 2%;
+      left: 50%;
+      width: 1750px;
+      height: 1200px;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      grid-auto-rows: 150px;
+      gap: 16px;
+      padding: 30px;
+      transform-origin: center top;
       transform-style: preserve-3d;
       will-change: transform;
+      /* Dynamic transform variables controlled by physics loop */
+      transform: translate3d(calc(-50% + var(--tx, 0px)), var(--ty, 0px), var(--tz, 0px)) rotateX(var(--rotX, 52deg)) rotateY(var(--rotY, 0deg));
     }
 
-    .globe-item {
-      position: absolute;
-      width: 54px; height: 54px;
-      left: -27px; top: -27px;
+    /* Gallery Tile */
+    .card-tile {
+      position: relative;
+      background: #1e1d1d;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      overflow: hidden;
       transform-style: preserve-3d;
-    }
-
-    .globe-card {
-      width: 100%; height: 100%;
-      border-radius: 7px;
-      overflow: hidden;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      box-shadow: 0 0 0 1px rgba(242, 237, 227, 0.06);
-      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
-                  box-shadow 0.5s ease;
-      will-change: transform;
-    }
-
-    .globe-card img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-      filter: saturate(0.72) brightness(0.82) contrast(1.08);
-      transition: filter 0.5s ease;
-    }
-
-    .globe-item:hover .globe-card {
-      transform: translateZ(70px) scale(1.55);
-      box-shadow:
-        0 12px 44px rgba(255, 59, 48, 0.55),
-        0 0 0 1px var(--accent);
-    }
-
-    .globe-item:hover img {
-      filter: saturate(1.35) brightness(1.05) contrast(1.05);
-    }
-
-    .globe-coords {
-      position: absolute;
-      bottom: 36px;
-      left: 5vw; right: 5vw;
-      display: flex;
-      justify-content: space-between;
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.18em;
-      color: rgba(242, 237, 227, 0.28);
-      pointer-events: none;
-      z-index: 5;
-    }
-
-    /* ============================================================
-       SERVICES (physics hover rows)
-    ============================================================ */
-    .services {
-      padding: 140px 5vw 120px;
-      border-top: 1px solid var(--border);
-      position: relative;
-      z-index: 1;
-    }
-
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      flex-wrap: wrap;
-      gap: 24px;
-      margin-bottom: 64px;
-    }
-
-    .section-head h2 {
-      font-size: clamp(1.9rem, 3.6vw, 3rem);
-      font-weight: 800;
-      letter-spacing: -0.04em;
-      text-transform: uppercase;
-      line-height: 1;
-    }
-
-    .section-head h2 em {
-      font-family: var(--serif);
-      font-style: italic;
-      font-weight: 400;
-      text-transform: none;
-    }
-
-    .section-head p {
-      max-width: 320px;
-      font-size: 13px;
-      line-height: 1.7;
-      color: var(--muted);
-      font-weight: 300;
-    }
-
-    .service {
-      position: relative;
-      height: 20vh;
-      min-height: 140px;
-      border-top: 1px solid var(--border);
-      overflow: hidden;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease, border-color 0.3s ease;
       cursor: pointer;
-      will-change: height;
     }
 
-    .service:last-child { border-bottom: 1px solid var(--border); }
+    /* Organic irregular layouts matching archival labs layout */
+    .card-tile.h-span-2 { grid-row: span 2; }
+    .card-tile.w-span-2 { grid-column: span 2; }
+    .card-tile.hw-span-2 { grid-column: span 2; grid-row: span 2; }
 
-    .service-name {
+    .card-img-wrap {
       position: absolute;
       inset: 0;
-      z-index: 3;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 1vw;
-      pointer-events: none;
-    }
-
-    .service-name h3 {
-      font-size: clamp(2.2rem, 6vw, 5.4rem);
-      font-weight: 900;
-      letter-spacing: -0.045em;
-      text-transform: uppercase;
-      color: var(--accent);
-      transition: color 0.4s ease, letter-spacing 0.5s ease;
-    }
-
-    .service-name .index {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      color: rgba(242, 237, 227, 0.35);
-    }
-
-    .service-images {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1.4vw;
-      opacity: 0;
-      transform: translateY(100%);
-      pointer-events: none;
-    }
-
-    .service-images .img {
-      width: 13vw;
-      max-width: 168px;
-      aspect-ratio: 3 / 4;
-      border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.55);
-      transform: translateY(30px);
+      transform-style: preserve-3d;
     }
 
-    .service-images .img:nth-child(2) { transform: translateY(-14px); }
-
-    .service-images img {
-      width: 100%; height: 100%;
+    .card-tile img {
+      width: 100%;
+      height: 100%;
       object-fit: cover;
-      display: block;
-      filter: saturate(0.9) contrast(1.05);
+      filter: grayscale(20%) contrast(110%) brightness(0.85);
+      transform: scale(1.02);
+      transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
     }
 
-    .tags-container {
+    .card-tile::before {
+      content: '';
       position: absolute;
       inset: 0;
-      z-index: 4;
+      background: linear-gradient(180deg, transparent 40%, rgba(18, 17, 17, 0.85) 100%);
+      z-index: 2;
+      opacity: 0.7;
+      transition: opacity 0.3s ease;
       pointer-events: none;
     }
 
-    .tag {
+    .card-badge {
       position: absolute;
-      padding: 7px 15px;
-      background: var(--accent);
-      color: #fff;
-      font-family: var(--font);
-      font-size: 10px;
+      top: 10px;
+      right: 10px;
+      z-index: 4;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: rgba(246, 241, 220, 0.8);
+      background: rgba(18, 17, 17, 0.7);
+      backdrop-filter: blur(4px);
+      padding: 3px 6px;
+      border-radius: 2px;
+      border: 1px solid rgba(246, 241, 220, 0.15);
+      transition: color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .card-meta {
+      position: absolute;
+      bottom: 12px;
+      left: 14px;
+      right: 14px;
+      z-index: 4;
+      transform: translateY(6px);
+      opacity: 0.75;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .card-title {
+      font-family: var(--font-sans);
+      font-size: 13px;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.09em;
-      border-radius: 40px;
-      white-space: nowrap;
-      opacity: 0;
-      transform: scale(0.8);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
-    }
-
-    /* ============================================================
-       WORK GRID
-    ============================================================ */
-    .work {
-      padding: 140px 5vw 120px;
-      border-top: 1px solid var(--border);
-      position: relative;
-      z-index: 1;
-    }
-
-    .work-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 22px;
-    }
-
-    .project-card {
-      position: relative;
-      aspect-ratio: 4 / 3;
-      border-radius: 18px;
-      overflow: hidden;
-      background: var(--surface);
-      cursor: pointer;
-      transform-style: preserve-3d;
-      will-change: transform;
-      box-shadow: 0 0 0 1px var(--border);
-    }
-
-    .project-card img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-      filter: saturate(0.8) brightness(0.78);
-      transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
-                  filter 0.6s ease;
-    }
-
-    .project-card:hover img {
-      transform: scale(1.07);
-      filter: saturate(1.15) brightness(0.95);
-    }
-
-    .project-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      box-shadow: inset 0 0 0 1px rgba(242, 237, 227, 0.06);
-      pointer-events: none;
-      transition: box-shadow 0.5s ease;
-    }
-
-    .project-card:hover::after {
-      box-shadow: inset 0 0 0 1px rgba(255, 59, 48, 0.45);
-    }
-
-    .project-info {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 30px;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.82), transparent 62%);
-      pointer-events: none;
-      z-index: 2;
-    }
-
-    .project-tag {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 12px;
-    }
-
-    .project-info h3 {
-      font-size: clamp(1.4rem, 2.4vw, 2.1rem);
-      font-weight: 800;
-      letter-spacing: -0.035em;
-      text-transform: uppercase;
-    }
-
-    .project-info .arrow {
-      position: absolute;
-      right: 30px;
-      bottom: 30px;
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      border: 1px solid rgba(242, 237, 227, 0.25);
+      letter-spacing: 0.04em;
+      color: #fff;
       display: flex;
       align-items: center;
-      justify-content: center;
-      color: var(--text);
-      transition: background 0.4s ease, border-color 0.4s ease, transform 0.4s ease;
+      gap: 6px;
     }
 
-    .project-card:hover .arrow {
+    .card-category {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* === HOVER POP INTERACTION === */
+    .card-tile:hover {
+      z-index: 40;
+      transform: translateZ(95px) scale(1.06);
+      border-color: var(--accent);
+      box-shadow: 
+        0 0 0 1px var(--accent),
+        0 14px 40px -10px rgba(0, 0, 0, 0.9),
+        0 0 35px var(--accent-glow);
+    }
+
+    .card-tile:hover img {
+      filter: grayscale(0%) contrast(115%) brightness(1.08);
+      transform: scale(1.12);
+    }
+
+    .card-tile:hover .card-meta {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .card-tile:hover .card-badge {
+      color: #fff;
+      border-color: var(--accent);
       background: var(--accent);
-      border-color: var(--accent);
-      transform: rotate(-45deg);
     }
 
-    /* ============================================================
-       FOOTER
-    ============================================================ */
-    footer {
-      padding: 150px 5vw 50px;
-      border-top: 1px solid var(--border);
-      position: relative;
-      z-index: 1;
+    /* Modal Styling */
+    #projectModal {
+      transition: opacity 0.35s ease, visibility 0.35s ease;
+    }
+    #modalPanel {
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.35s ease;
     }
 
-    .footer-big {
-      font-size: clamp(2.8rem, 9vw, 9rem);
-      font-weight: 900;
-      line-height: 0.9;
-      letter-spacing: -0.05em;
-      text-transform: uppercase;
+    /* Keyframes for Floating Marquee */
+    @keyframes marqueeMove {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
     }
 
-    .footer-big em {
-      font-family: var(--serif);
-      font-style: italic;
-      font-weight: 400;
-      text-transform: none;
-    }
-
-    .footer-email {
+    .marquee-inner {
       display: inline-flex;
-      align-items: center;
-      gap: 18px;
-      margin-top: 44px;
-      font-size: clamp(1.1rem, 2.4vw, 1.8rem);
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      color: var(--text);
-      text-decoration: none;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
-      transition: color 0.35s ease, border-color 0.35s ease;
+      white-space: nowrap;
+      animation: marqueeMove 32s linear infinite;
     }
 
-    .footer-email:hover {
-      color: var(--accent);
-      border-color: var(--accent);
-    }
-
-    .footer-email .arrow {
-      transition: transform 0.35s ease;
-    }
-
-    .footer-email:hover .arrow { transform: translate(4px, -4px); }
-
-    .footer-bottom {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 100px;
-      padding-top: 26px;
-      border-top: 1px solid var(--border);
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: rgba(242, 237, 227, 0.35);
-    }
-
-    .footer-bottom a {
-      color: inherit;
-      text-decoration: none;
-      transition: color 0.3s ease;
-    }
-
-    .footer-bottom a:hover { color: var(--accent); }
-
-    /* ============================================================
-       RESPONSIVE
-    ============================================================ */
-    @media (max-width: 900px) {
-      .nav-links { display: none; }
-      .globe-head { top: 100px; }
-      .ring-1, .ring-2 { display: none; }
-      .work-grid { grid-template-columns: 1fr; }
-      .project-card { aspect-ratio: 4 / 3; }
-    }
-
-    @media (max-width: 640px) {
-      body { cursor: auto; }
-      .cursor-dot, .cursor-ring { display: none; }
-      .nav { padding: 16px 6vw; }
-      .nav-cta { padding: 10px 16px; font-size: 10px; }
-      .hero { padding-top: 120px; }
-      .hero-meta { gap: 1.4rem; }
-      .scroll-hint { display: none; }
-      .service { height: 16vh; min-height: 110px; }
-      .service-name h3 { font-size: clamp(1.8rem, 9vw, 3rem); }
-      .service-images .img { width: 24vw; }
-      .globe-head { position: relative; top: auto; left: auto; margin-bottom: 30px; text-align: left; padding: 0 6vw; }
-      .globe-section { flex-direction: column; justify-content: flex-start; padding-top: 110px; }
-      .globe-coords { font-size: 9px; }
-      .footer-bottom { margin-top: 60px; }
+    .marquee-inner:hover {
+      animation-play-state: paused;
     }
   </style>
 </head>
-<body class="loading">
+<body class="relative bg-[#121111] text-[#f6f1dc] overflow-hidden">
 
-  <!-- ===== PRELOADER ===== -->
+  <!-- Scanlines & Atmosphere -->
+  <div class="scanlines absolute inset-0 z-50 pointer-events-none"></div>
+  <div class="vignette absolute inset-0 z-40 pointer-events-none"></div>
+
+  <!-- ============================================================
+       1. AUTHENTIC ARCHIVAL PRELOADER
+  ============================================================ -->
   <div id="preloader">
-    <div class="loader-letters">
-      <span>G</span><span>R</span><span>I</span><span>F</span><span>L</span><span>A</span><span>N</span>
+    <div class="flex flex-col items-center justify-center space-y-6 max-w-lg px-6">
+      
+      <!-- Monogram Glyph -->
+      <div class="w-12 h-12 rounded border border-[var(--border)] flex items-center justify-center text-red-500 text-xl font-bold font-mono shadow-[0_0_20px_rgba(255,51,34,0.3)]">
+        ✦
+      </div>
+
+      <!-- Letter Reveal Typography -->
+      <div class="loader-title text-center text-4xl sm:text-6xl font-extrabold tracking-[-0.04em] uppercase font-sans text-[#f6f1dc]">
+        <span>G</span><span>R</span><span>I</span><span>F</span><span>L</span><span>A</span><span>N</span>
+        <span class="inline-block mx-1"></span>
+        <span class="text-red-500 italic font-serif lowercase" style="font-family:'Instrument Serif', serif;">labs</span>
+      </div>
+
+      <div class="font-mono text-[11px] tracking-[0.25em] text-[#f6f1dc]/50 uppercase flex items-center gap-3">
+        <span class="inline-block w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+        INITIALIZING 3D SPATIAL ENGINE · LAT 40.7128° N
+      </div>
+
+      <!-- Loading Bar -->
+      <div class="w-64 sm:w-80 h-[2px] bg-[#222] relative overflow-hidden rounded-full">
+        <div id="loaderProgress" class="absolute left-0 top-0 bottom-0 bg-[#ff3322] w-0 transition-all duration-300 ease-out shadow-[0_0_10px_#ff3322]"></div>
+      </div>
+
+      <div class="flex justify-between w-64 sm:w-80 font-mono text-[10px] text-[#f6f1dc]/40">
+        <span id="loadText">PARSING GEOMETRY</span>
+        <span id="loadPercent">0%</span>
+      </div>
     </div>
-    <div class="loader-bar">
-      <div class="loader-bar-inner"></div>
-    </div>
-    <div class="loader-caption">Initializing experience</div>
   </div>
 
-  <!-- ===== CURSOR ===== -->
-  <div class="cursor-dot"></div>
-  <div class="cursor-ring"></div>
+  <!-- ============================================================
+       2. SIGNATURE GRID HEADER
+  ============================================================ -->
+  <header class="w-full h-[130px] border-t border-[var(--border)] relative z-30 select-none">
+    
+    <!-- Top Row: Links & Meta (42px) -->
+    <div class="grid grid-cols-12 h-[42px] border-b border-[var(--border)] text-xs">
+      
+      <!-- Nav Left (Home / Archive / Lab) -->
+      <div class="col-span-4 sm:col-span-3 flex header-cell p-0">
+        <button onclick="navigateTab('home')" class="nav-btn w-1/3 h-full border-r border-[var(--border)] flex items-center justify-center font-mono font-medium">Home</button>
+        <button onclick="navigateTab('archive')" class="nav-btn w-1/3 h-full border-r border-[var(--border)] flex items-center justify-center font-mono font-medium">Index</button>
+        <button onclick="navigateTab('info')" class="nav-btn w-1/3 h-full flex items-center justify-center font-mono font-medium">About</button>
+      </div>
 
-  <!-- ===== NAV ===== -->
-  <nav class="nav">
-    <a href="#top" class="nav-logo">
-      <span class="logo-dot"></span>
-      Griflan <span class="logo-em">Labs</span>
-    </a>
-    <div class="nav-links">
-      <a href="#work">Work</a>
-      <a href="#capabilities">Studio</a>
-      <a href="#contact">Contact</a>
+      <!-- Telemetry Center Pill -->
+      <div class="col-span-4 sm:col-span-6 header-cell justify-center px-4 overflow-hidden hidden sm:flex">
+        <div class="flex items-center gap-4 font-mono text-[11px] tracking-wider text-[#f6f1dc]/70">
+          <span class="flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-400"></span>
+            SYS: ACTIVE
+          </span>
+          <span class="text-white/20">|</span>
+          <span id="liveClock" class="text-white/90">00:00:00 UTC</span>
+          <span class="text-white/20">|</span>
+          <span id="posIndicator" class="text-[#ff3322]">POS: X:00 Y:00</span>
+        </div>
+      </div>
+
+      <!-- Action & Sound Right -->
+      <div class="col-span-8 sm:col-span-3 flex header-cell p-0 justify-end border-r-0">
+        <button id="soundToggleBtn" onclick="toggleAudio()" class="nav-btn px-3 h-full border-r border-[var(--border)] flex items-center gap-1.5 font-mono text-[10px]">
+          <span id="soundIcon">🔊</span>
+          <span id="soundLabel" class="hidden md:inline">AUDIO ON</span>
+        </button>
+        <a href="mailto:hello@griflanlabs.com" class="bg-[#ff3322] hover:bg-[#ff200e] text-white font-sans text-xs font-bold uppercase tracking-wider px-4 sm:px-6 h-full flex items-center justify-center transition-transform hover:scale-[1.02] shadow-[0_0_20px_rgba(255,51,34,0.4)]">
+          Start A Project
+        </a>
+      </div>
     </div>
-    <a href="#contact" class="nav-cta">
-      Start a Project
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="5" y1="12" x2="19" y2="12"></line>
-        <polyline points="12 5 19 12 12 19"></polyline>
-      </svg>
-    </a>
-  </nav>
 
-  <main id="top">
-
-    <!-- ===== HERO ===== -->
-    <section class="hero">
-      <h1 class="hero-title">
-        <span class="line">
-          <span class="word">Big</span>
-          <span class="word serif">Idea?</span>
-        </span>
-        <span class="line">
-          <span class="word">We</span>
-          <span class="word">Build</span>
-          <span class="word serif">It.</span>
-        </span>
-      </h1>
-
-      <p class="hero-sub">
-        Griflan Labs is an experimental studio — a living showcase of the brands,
-        digital experiences, and products we craft through motion, code, and design.
-      </p>
-
-      <div class="hero-meta">
-        <span><strong>●</strong> Available for Q3 / 2025</span>
-        <span>Motion · 3D · Brand · Web</span>
-        <span>NYC — <strong>40.7128° N</strong></span>
+    <!-- Bottom Row: Big Branding & Typography (88px) -->
+    <div class="grid grid-cols-12 h-[88px] text-xs">
+      
+      <!-- Flame / Laboratory Symbol -->
+      <div class="col-span-2 sm:col-span-1 header-cell justify-center text-2xl font-serif text-[#ff3322]">
+        <span class="hover:scale-125 transition-transform duration-300 cursor-pointer" title="Griflan Core">✦</span>
       </div>
 
-      <div class="scroll-hint">Scroll to explore</div>
-    </section>
-
-    <!-- ===== MARQUEE ===== -->
-    <section class="marquee-section" aria-hidden="true">
-      <div class="marquee">
-        <span>Branding</span>
-        <span>Motion Design</span>
-        <span>3D Animation</span>
-        <span>Web Experiences</span>
-        <span>Art Direction</span>
-        <span>Creative Code</span>
-        <span>Packaging</span>
-        <span>Strategy</span>
-        <span>Branding</span>
-        <span>Motion Design</span>
-        <span>3D Animation</span>
-        <span>Web Experiences</span>
-        <span>Art Direction</span>
-        <span>Creative Code</span>
-        <span>Packaging</span>
-        <span>Strategy</span>
-      </div>
-    </section>
-
-    <!-- ===== GLOBE ===== -->
-    <section class="globe-section" id="work">
-      <div class="globe-head">
-        <span class="label">(01) — Selected Work</span>
-        <h2>Every idea,<br><em>in orbit.</em></h2>
-        <p class="hint"><span class="pulse"></span> Drag to spin · Hover to inspect</p>
+      <!-- Left Subhead -->
+      <div class="col-span-4 sm:col-span-3 header-cell px-4 sm:px-6 flex-col justify-center items-start">
+        <span class="text-[10px] font-mono tracking-widest text-[#f6f1dc]/40 uppercase mb-0.5">Specialization</span>
+        <span class="text-xs sm:text-sm font-semibold tracking-wide text-[#f6f1dc]">Branding + Web + Motion</span>
       </div>
 
-      <div class="globe-stage" id="globe-stage">
-        <div class="globe-glow"></div>
-        <div class="globe-ring ring-1"></div>
-        <div class="globe-ring ring-2"></div>
-        <div class="globe-inner" id="globe-inner"></div>
-      </div>
-
-      <div class="globe-coords">
-        <span>LAT 40.7128° N</span>
-        <span>LNG 74.0060° W</span>
-      </div>
-    </section>
-
-    <!-- ===== CAPABILITIES ===== -->
-    <section class="services" id="capabilities">
-      <div class="section-head">
-        <h2>What we <em>do best.</em></h2>
-        <p>Three disciplines, one obsession — making brands feel alive through motion and interaction.</p>
-      </div>
-
-      <div class="service" data-tags="Editorial, Fashion Identity, Monochrome, Shadow Play, Minimalism, Studio Portraits">
-        <div class="service-name">
-          <h3>Silhouette</h3>
-          <span class="index">01 / Identity</span>
-        </div>
-        <div class="service-images">
-          <div class="img"><img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=520&fit=crop&auto=format" alt="Silhouette 1"></div>
-          <div class="img"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=520&fit=crop&auto=format" alt="Silhouette 2"></div>
-          <div class="img"><img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=520&fit=crop&auto=format" alt="Silhouette 3"></div>
-        </div>
-        <div class="tags-container"></div>
-      </div>
-
-      <div class="service" data-tags="Color Theory, Graphics, Poster Design, Saturation, Pop Art, Visual Energy">
-        <div class="service-name">
-          <h3>Chroma</h3>
-          <span class="index">02 / Visual</span>
-        </div>
-        <div class="service-images">
-          <div class="img"><img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=400&h=520&fit=crop&auto=format" alt="Chroma 1"></div>
-          <div class="img"><img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=400&h=520&fit=crop&auto=format" alt="Chroma 2"></div>
-          <div class="img"><img src="https://images.unsplash.com/photo-1550859492-d5da9d8e45f3?w=400&h=520&fit=crop&auto=format" alt="Chroma 3"></div>
-        </div>
-        <div class="tags-container"></div>
-      </div>
-
-      <div class="service" data-tags="Character Design, Portraits, Visual Storytelling, Emotion, Identity, Artistic Direction">
-        <div class="service-name">
-          <h3>Persona</h3>
-          <span class="index">03 / Character</span>
-        </div>
-        <div class="service-images">
-          <div class="img"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=520&fit=crop&auto=format" alt="Persona 1"></div>
-          <div class="img"><img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=520&fit=crop&auto=format" alt="Persona 2"></div>
-          <div class="img"><img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=520&fit=crop&auto=format" alt="Persona 3"></div>
-        </div>
-        <div class="tags-container"></div>
-      </div>
-    </section>
-
-    <!-- ===== WORK GRID ===== -->
-    <section class="work">
-      <div class="section-head">
-        <h2>Recent <em>projects.</em></h2>
-        <p>Selected builds from the last twelve months — brands, products, and digital worlds.</p>
-      </div>
-
-      <div class="work-grid">
-        <a class="project-card" href="#">
-          <img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=1000&auto=format&fit=crop" alt="MindJoin project">
-          <div class="project-info">
-            <span class="project-tag">Web Design · Development</span>
-            <h3>MindJoin</h3>
-            <span class="arrow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="19" x2="19" y2="5"></line>
-                <polyline points="8 5 19 5 19 16"></polyline>
-              </svg>
-            </span>
-          </div>
-        </a>
-
-        <a class="project-card" href="#">
-          <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=1000&auto=format&fit=crop" alt="Saffron Finance project">
-          <div class="project-info">
-            <span class="project-tag">3D Animation · Motion</span>
-            <h3>Saffron Finance</h3>
-            <span class="arrow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="19" x2="19" y2="5"></line>
-                <polyline points="8 5 19 5 19 16"></polyline>
-              </svg>
-            </span>
-          </div>
-        </a>
-
-        <a class="project-card" href="#">
-          <img src="https://images.unsplash.com/photo-1549490349-8643362247b5?w=1000&auto=format&fit=crop" alt="Five Pathways project">
-          <div class="project-info">
-            <span class="project-tag">Brand Identity · Strategy</span>
-            <h3>Five Pathways</h3>
-            <span class="arrow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="19" x2="19" y2="5"></line>
-                <polyline points="8 5 19 5 19 16"></polyline>
-              </svg>
-            </span>
-          </div>
-        </a>
-
-        <a class="project-card" href="#">
-          <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=1000&auto=format&fit=crop" alt="Hugo project">
-          <div class="project-info">
-            <span class="project-tag">Motion Design · Art Direction</span>
-            <h3>Hugo</h3>
-            <span class="arrow">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="19" x2="19" y2="5"></line>
-                <polyline points="8 5 19 5 19 16"></polyline>
-              </svg>
-            </span>
-          </div>
+      <!-- Main Logo Anchor -->
+      <div class="col-span-6 sm:col-span-4 header-cell justify-center px-4">
+        <a href="#" class="text-center group">
+          <span class="text-2xl sm:text-4xl md:text-5xl font-serif font-normal tracking-tight text-[#f6f1dc]">
+            Griflan <span class="italic text-red-500 font-serif font-light tracking-normal">Labs</span>
+          </span>
         </a>
       </div>
-    </section>
 
-    <!-- ===== FOOTER ===== -->
-    <footer id="contact">
-      <h2 class="footer-big">Have a <em>big idea?</em></h2>
-      <a href="mailto:hello@griflanlabs.com" class="footer-email">
-        hello@griflanlabs.com
-        <span class="arrow">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="5" y1="19" x2="19" y2="5"></line>
-            <polyline points="8 5 19 5 19 16"></polyline>
-          </svg>
-        </span>
-      </a>
-
-      <div class="footer-bottom">
-        <span>© 2025 Griflan Labs — All rights reserved</span>
-        <span>Built with motion &amp; code</span>
-        <span><a href="#top">Back to top ↑</a></span>
+      <!-- Right Subhead / Archival Note -->
+      <div class="hidden sm:flex col-span-4 header-cell px-6 flex-col justify-center items-start border-r-0">
+        <span class="text-[10px] font-mono tracking-widest text-[#f6f1dc]/40 uppercase mb-0.5">Manifesto</span>
+        <span class="text-xs sm:text-sm font-semibold tracking-wide text-[#f6f1dc]">Crafting Brands That Hit Hard</span>
       </div>
-    </footer>
+    </div>
+  </header>
 
+  <!-- ============================================================
+       3. 3D INTERACTIVE PERSPECTIVE STAGE
+  ============================================================ -->
+  <main class="stage-container" id="stage">
+    
+    <!-- Coordinate HUD Floating Anchors -->
+    <div class="absolute top-6 left-6 z-20 font-mono text-[11px] tracking-widest text-[#f6f1dc]/40 pointer-events-none flex flex-col gap-1">
+      <span class="text-[#ff3322]">✦ REF: 12.904057</span>
+      <span>CAM: 52° PITCH</span>
+    </div>
+
+    <div class="absolute top-6 right-6 z-20 font-mono text-[11px] tracking-widest text-[#f6f1dc]/40 pointer-events-none flex flex-col items-end gap-1">
+      <span>GRID: 21 NODES</span>
+      <span class="text-white/60">DRAG / HOVER TO EXPLORE</span>
+    </div>
+
+    <!-- Isometric Background Lines -->
+    <div class="grid-lines"></div>
+
+    <!-- The 3D Infinite Movable Plane -->
+    <div class="plane-canvas" id="plane">
+      <!-- 21 Rich Curated Project Tiles loaded dynamically via JavaScript -->
+    </div>
+
+    <!-- Stage Camera Controls Pill (Bottom Right) -->
+    <div class="absolute bottom-6 right-6 z-30 flex items-center bg-[#181717]/90 border border-[var(--border)] rounded-full p-1.5 backdrop-blur-md shadow-2xl">
+      <button onclick="adjustZoom(-100)" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-mono text-[#f6f1dc] hover:bg-[#ff3322] hover:text-white transition" title="Zoom In">+</button>
+      <button onclick="resetCamera()" class="px-3 h-8 text-[10px] font-mono uppercase tracking-wider text-[#f6f1dc]/70 hover:text-white transition">Reset</button>
+      <button onclick="adjustZoom(100)" class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-mono text-[#f6f1dc] hover:bg-[#ff3322] hover:text-white transition" title="Zoom Out">−</button>
+    </div>
+
+    <!-- Status Marquee Ticker Pill (Bottom Center) -->
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 w-11/12 max-w-xl pointer-events-auto">
+      <div class="bg-[#181717]/80 backdrop-blur-md border border-[var(--border)] rounded-full py-2.5 px-6 overflow-hidden shadow-[0_10px_35px_rgba(0,0,0,0.6)] flex items-center justify-center">
+        <div class="marquee-inner font-mono text-[11px] tracking-widest text-[#f6f1dc]/80 uppercase space-x-8">
+          <span>COGNITO ACQUIRED BY PLAID FOR $250M</span>
+          <span class="text-red-500">✦</span>
+          <span>NOW BOOKING DIRECT TO CONSUMER & AI VENTURES</span>
+          <span class="text-red-500">✦</span>
+          <span>SPECIALIZED VISUAL IDENTITIES & SPATIAL EXPERIENCES</span>
+          <span class="text-red-500">✦</span>
+          <span>COGNITO ACQUIRED BY PLAID FOR $250M</span>
+          <span class="text-red-500">✦</span>
+          <span>NOW BOOKING DIRECT TO CONSUMER & AI VENTURES</span>
+        </div>
+      </div>
+    </div>
   </main>
 
+  <!-- ============================================================
+       4. LIGHTBOX / INSPECTION PROJECT MODAL
+  ============================================================ -->
+  <div id="projectModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-lg flex items-center justify-center p-4 sm:p-8 opacity-0 pointer-events-none transition-all duration-300">
+    <div id="modalPanel" class="bg-[#161515] border border-[var(--border)] rounded-md max-w-4xl w-full overflow-hidden shadow-2xl transform scale-95 flex flex-col md:flex-row relative max-h-[90vh]">
+      
+      <!-- Close button -->
+      <button onclick="closeModal()" class="absolute top-4 right-4 z-20 w-9 h-9 rounded-full bg-black/70 border border-white/20 text-white flex items-center justify-center hover:bg-red-500 hover:border-red-500 transition-colors">
+        ✕
+      </button>
+
+      <!-- Media Preview (Left) -->
+      <div class="w-full md:w-3/5 bg-black relative flex items-center justify-center min-h-[280px] md:min-h-[460px] overflow-hidden">
+        <img id="modalImg" src="" alt="Project detail" class="w-full h-full object-cover">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
+      </div>
+
+      <!-- Content (Right) -->
+      <div class="w-full md:w-2/5 p-6 md:p-8 flex flex-col justify-between overflow-y-auto">
+        <div>
+          <div class="flex items-center gap-2 font-mono text-[10px] text-red-500 tracking-widest uppercase mb-2">
+            <span id="modalIndex">01 / ARCHIVE</span>
+            <span>•</span>
+            <span id="modalCategory">IDENTITY</span>
+          </div>
+          
+          <h2 id="modalTitle" class="text-2xl md:text-3xl font-serif text-[#f6f1dc] font-normal mb-3">Project Title</h2>
+          
+          <p id="modalDesc" class="text-sm font-sans text-[#f6f1dc]/70 leading-relaxed mb-6">
+            Detailed breakdown of speculative research, creative direction, physical materials, and algorithmic systems developed for high-growth innovators.
+          </p>
+
+          <div class="space-y-3 border-t border-[var(--border)] pt-4 font-mono text-xs text-[#f6f1dc]/80">
+            <div class="flex justify-between">
+              <span class="text-[#f6f1dc]/40">YEAR</span>
+              <span id="modalYear">2026</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#f6f1dc]/40">DELIVERABLES</span>
+              <span id="modalDeliverables">Spatial, Brand, 3D</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[#f6f1dc]/40">CLIENT IMPACT</span>
+              <span class="text-green-400 font-bold">Industry Benchmark</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-6 mt-6 border-t border-[var(--border)] flex gap-3">
+          <a href="mailto:hello@griflanlabs.com?subject=Inquiry" class="flex-1 bg-[#ff3322] hover:bg-[#e02616] text-white font-sans text-xs font-bold uppercase tracking-wider py-3 px-4 rounded text-center transition">
+            Commission System
+          </a>
+          <button onclick="closeModal()" class="px-4 py-3 rounded border border-[var(--border)] font-mono text-xs uppercase text-[#f6f1dc]/60 hover:text-white hover:border-white/40 transition">
+            Dismiss
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       5. CLIENT SCRIPTS & REALTIME 3D LERP PHYSICS
+  ============================================================ -->
   <script>
-    /* ============================================================
-       1. SETUP — Lenis smooth scroll + ScrollTrigger sync
-    ============================================================ */
-    gsap.registerPlugin(ScrollTrigger);
-
-    const lenis = new Lenis({
-      duration: 1.15,
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 1.6
-    });
-
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add((time) => { lenis.raf(time * 1000); });
-    gsap.ticker.lagSmoothing(0);
-
-    /* ============================================================
-       2. CUSTOM CURSOR (desktop only)
-    ============================================================ */
-    const isFinePointer = window.matchMedia('(pointer: fine)').matches;
-    const dot  = document.querySelector('.cursor-dot');
-    const ring = document.querySelector('.cursor-ring');
-
-    if (isFinePointer && dot && ring) {
-      gsap.set([dot, ring], { xPercent: -50, yPercent: -50 });
-
-      const dotX  = gsap.quickTo(dot,  'x', { duration: 0.10, ease: 'power3' });
-      const dotY  = gsap.quickTo(dot,  'y', { duration: 0.10, ease: 'power3' });
-      const ringX = gsap.quickTo(ring, 'x', { duration: 0.42, ease: 'power3' });
-      const ringY = gsap.quickTo(ring, 'y', { duration: 0.42, ease: 'power3' });
-
-      window.addEventListener('pointermove', (e) => {
-        dotX(e.clientX);  dotY(e.clientY);
-        ringX(e.clientX); ringY(e.clientY);
-      }, { passive: true });
-
-      // Enlarge cursor on interactive elements
-      const bindHover = (el) => {
-        el.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
-        el.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
-      };
-      document.querySelectorAll('a, button, .service, .project-card, .globe-stage')
-        .forEach(bindHover);
-    }
-
-    /* ============================================================
-       3. NAV — scrolled state
-    ============================================================ */
-    const nav = document.querySelector('.nav');
-    lenis.on('scroll', ({ scroll }) => {
-      nav.classList.toggle('scrolled', scroll > 40);
-    });
-
-    /* ============================================================
-       4. ANCHOR LINKS — smooth scroll with Lenis
-    ============================================================ */
-    document.querySelectorAll('a[href^="#"]').forEach((link) => {
-      link.addEventListener('click', (e) => {
-        const id = link.getAttribute('href');
-        if (id.length < 2) return;
-        const target = document.querySelector(id);
-        if (!target) return;
-        e.preventDefault();
-        lenis.scrollTo(target, { offset: -70, duration: 1.4 });
-      });
-    });
-
-    /* ============================================================
-       5. PRELOADER → HERO INTRO
-    ============================================================ */
-    const preloader = document.getElementById('preloader');
-
-    const introTL = gsap.timeline({
-      onComplete: () => {
-        document.body.classList.remove('loading');
-        preloader.remove();
-        playHeroIntro();
+    /* ------------------------------------------------------------
+       PROJECT ARCHIVE DATABASE (21 Curated Archetypes)
+    ------------------------------------------------------------ */
+    const projectsData = [
+      {
+        id: "p1",
+        title: "KRONOS KINETICS",
+        cat: "Brand Architecture",
+        badge: "01 // ID",
+        layout: "h-span-2",
+        year: "2026",
+        deliverables: "Design Systems, 3D Identity",
+        desc: "A brutalist identity system developed for next-generation automated kinetic hardware and aerospace computing.",
+        img: "https://images.unsplash.com/photo-1558655146-d09347e92766?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p2",
+        title: "EDITORIAL DISPATCH",
+        cat: "Printed Archival",
+        badge: "02 // PUB",
+        layout: "",
+        year: "2025",
+        deliverables: "Book Design, Swiss Typography",
+        desc: "Curated 400-page retrospective monograph surveying speculative architectural experiments across Tokyo and Berlin.",
+        img: "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p3",
+        title: "HYPERION SYSTEM",
+        cat: "Spatial Compute",
+        badge: "03 // OS",
+        layout: "w-span-2",
+        year: "2026",
+        deliverables: "VisionOS Interfaces, WebGL",
+        desc: "Tactile spatial interfaces engineered for planetary telemetry arrays and autonomous deep sea research vessels.",
+        img: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p4",
+        title: "SONIC ARTIFACT 09",
+        cat: "Industrial Design",
+        badge: "04 // OBJ",
+        layout: "",
+        year: "2025",
+        deliverables: "Machined Aluminum, Acoustics",
+        desc: "Cast magnesium and blasted aluminum acoustic transducer engineered for high-fidelity spatial playback.",
+        img: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p5",
+        title: "SUB-ORBITAL MOTION",
+        cat: "Motion Architecture",
+        badge: "05 // MOV",
+        layout: "h-span-2",
+        year: "2026",
+        deliverables: "Houdini, Procedural Render",
+        desc: "Procedural title sequence and kinetic language for cinema campaigns exploring quantum gravity singularities.",
+        img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p6",
+        title: "MATTER PACKAGING",
+        cat: "Physical Systems",
+        badge: "06 // PKG",
+        layout: "",
+        year: "2025",
+        deliverables: "Algae Resin, Blind Deboss",
+        desc: "Zero-poly bio-composite luxury vessels fabricated from kelp alginate and post-industrial stone slurry.",
+        img: "https://images.unsplash.com/photo-1607082349566-187342175e2f?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p7",
+        title: "SYNAPSE CORP",
+        cat: "Visual Identity",
+        badge: "07 // COR",
+        layout: "",
+        year: "2026",
+        deliverables: "Global Rebrand, Typography",
+        desc: "A bold, unapologetic rebrand for a pioneer neural interface consortium during their $450M scale round.",
+        img: "https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p8",
+        title: "COGNITIVE FORM",
+        cat: "Generative Art",
+        badge: "08 // GEN",
+        layout: "hw-span-2",
+        year: "2026",
+        deliverables: "GLSL Shaders, Interactive",
+        desc: "Museum-scale installation responding to collective heartbeat and acoustic presence in real time.",
+        img: "https://images.unsplash.com/photo-1549490349-8643362247b5?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p9",
+        title: "ATLAS DASHBOARD",
+        cat: "Software Platform",
+        badge: "09 // UI",
+        layout: "",
+        year: "2025",
+        deliverables: "Design System, Fintech",
+        desc: "High-throughput algorithmic trading terminal designed with high legibility monospace telemetry.",
+        img: "https://images.unsplash.com/photo-1559028012-481c04fa702d?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p10",
+        title: "SPECIMEN TYPEFACE",
+        cat: "Type Foundry",
+        badge: "10 // TYP",
+        layout: "",
+        year: "2025",
+        deliverables: "Variable Font (18 Styles)",
+        desc: "A display serif constructed from historical 17th-century proportions merged with contemporary optical axis shifts.",
+        img: "https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p11",
+        title: "NEO TOKYO CAMPAIGN",
+        cat: "Creative Direction",
+        badge: "11 // DIR",
+        layout: "",
+        year: "2026",
+        deliverables: "Photography, Billboards",
+        desc: "Urban landscape visual takeover spanning Shibuya, Ginza, and high-frequency subway corridors.",
+        img: "https://images.unsplash.com/photo-1519608487953-e999c86e7455?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p12",
+        title: "POLYMERIC TEXTURE",
+        cat: "Material R&D",
+        badge: "12 // MAT",
+        layout: "h-span-2",
+        year: "2025",
+        deliverables: "Surface Optics, Tactile",
+        desc: "Microscopic study on light-refracting chromatic surfaces engineered for aerospace thermal shielding.",
+        img: "https://images.unsplash.com/photo-1550859492-d5da9d8e45f3?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p13",
+        title: "FUTURE ARCHIVE",
+        cat: "Digital Curatorial",
+        badge: "13 // WEB",
+        layout: "",
+        year: "2026",
+        deliverables: "WebGL, Next-Gen E-comm",
+        desc: "Infinite virtual repository housing rare architectural manuscripts and interactive 3D scans.",
+        img: "https://images.unsplash.com/photo-1558655146-364adaf1fcc9?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p14",
+        title: "OBSIDIAN MONOLITH",
+        cat: "Exhibition Design",
+        badge: "14 // SPA",
+        layout: "w-span-2",
+        year: "2026",
+        deliverables: "Venice Biennale Pavilion",
+        desc: "Freestanding carbon-fiber architectural structure investigating the sensory thresholds of absolute darkness.",
+        img: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p15",
+        title: "SOLARIS VEHICLE",
+        cat: "Autonomous Mobility",
+        badge: "15 // MOB",
+        layout: "",
+        year: "2026",
+        deliverables: "Cockpit Experience, HMI",
+        desc: "Intuitive head-up holographic projections and steering feedback systems for electric endurance vehicles.",
+        img: "https://images.unsplash.com/photo-1500534623283-312aade485b7?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p16",
+        title: "PRISM IDENTITY",
+        cat: "Brand Strategy",
+        badge: "16 // STR",
+        layout: "",
+        year: "2025",
+        deliverables: "Market Placement, Guidelines",
+        desc: "Strategic restructuring and design governance for a global collective of optical lens manufactures.",
+        img: "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p17",
+        title: "CHROMATIC HORIZON",
+        cat: "Motion Scenography",
+        badge: "17 // SCX",
+        layout: "h-span-2",
+        year: "2026",
+        deliverables: "Stage Visuals, Lighting",
+        desc: "Real-time generative light scoring for an international tour across 14 European concert halls.",
+        img: "https://images.unsplash.com/photo-1557683316-973673baf926?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p18",
+        title: "QUANTUM HARDWARE",
+        cat: "Product Archetype",
+        badge: "18 // ENG",
+        layout: "",
+        year: "2026",
+        deliverables: "Cryogenic Housing, Metals",
+        desc: "Bespoke copper and gold-plated refrigeration chambers built to shelter 1,024-qubit processors.",
+        img: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p19",
+        title: "TERRA FIRMA",
+        cat: "Environmental Brand",
+        badge: "19 // ENV",
+        layout: "w-span-2",
+        year: "2025",
+        deliverables: "Wayfinding, Signage",
+        desc: "Wayfinding program for a 40-acre biosphere park in Switzerland using etched slate and bronze pins.",
+        img: "https://images.unsplash.com/photo-1549490349-8643362247b5?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p20",
+        title: "NEURAL SCULPT",
+        cat: "Algorithmic Cinema",
+        badge: "20 // CIN",
+        layout: "",
+        year: "2026",
+        deliverables: "Experimental Short Film",
+        desc: "Award-winning speculative narrative exploring artificial neural rebirth inside decommissioned servers.",
+        img: "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=900&auto=format&fit=crop&q=80"
+      },
+      {
+        id: "p21",
+        title: "VANGUARD LABS",
+        cat: "Speculative Research",
+        badge: "21 // LAB",
+        layout: "",
+        year: "2026",
+        deliverables: "Future Foundry Tools",
+        desc: "Internal exploration project developing autonomous CSS 3D coordinate generation and spatial tools.",
+        img: "https://images.unsplash.com/photo-1558655146-d09347e92766?w=900&auto=format&fit=crop&q=80"
       }
-    });
+    ];
 
-    introTL
-      .to('.loader-letters span', {
-        y: 0,
-        opacity: 1,
-        duration: 0.85,
-        stagger: 0.055,
-        ease: 'power4.out'
-      })
-      .to('.loader-bar-inner', {
-        width: '100%',
-        duration: 1.1,
-        ease: 'power2.inOut'
-      }, '-=0.5')
-      .to('.loader-caption', {
-        opacity: 1, duration: 0.4
-      }, '-=0.7')
-      .to('#preloader', {
-        opacity: 0,
-        duration: 0.65,
-        delay: 0.25,
-        ease: 'power2.inOut'
-      });
+    /* ------------------------------------------------------------
+       INITIALIZE TILE DOM
+    ------------------------------------------------------------ */
+    const plane = document.getElementById('plane');
+    
+    function buildGallery() {
+      plane.innerHTML = '';
+      projectsData.forEach((item, index) => {
+        const tile = document.createElement('div');
+        tile.className = `card-tile ${item.layout}`;
+        tile.dataset.id = item.id;
+        tile.dataset.index = index;
+        
+        tile.innerHTML = `
+          <div class="card-img-wrap">
+            <img src="${item.img}" alt="${item.title}" loading="lazy" onerror="this.src='https://placehold.co/800x600/1e1d1d/f6f1dc?text=${encodeURIComponent(item.title)}'">
+          </div>
+          <span class="card-badge">${item.badge}</span>
+          <div class="card-meta">
+            <span class="card-category">${item.cat}</span>
+            <div class="card-title">
+              ${item.title}
+              <span class="text-xs text-red-500 font-serif">→</span>
+            </div>
+          </div>
+        `;
 
-    function playHeroIntro() {
-      gsap.from('.nav', {
-        y: -28, opacity: 0, duration: 0.9, ease: 'power3.out'
-      });
+        // Click opens lightbox
+        tile.addEventListener('click', () => {
+          playSound('click');
+          openModal(item, index);
+        });
 
-      gsap.to('.hero-title .word', {
-        y: 0,
-        duration: 1.25,
-        stagger: 0.09,
-        ease: 'power4.out'
-      });
+        // 3D Parallax Tilt on each individual card
+        tile.addEventListener('pointermove', (e) => {
+          const rect = tile.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width - 0.5;
+          const y = (e.clientY - rect.top) / rect.height - 0.5;
+          tile.style.transform = `translateZ(95px) scale(1.06) rotateY(${x * 16}deg) rotateX(${-y * 16}deg)`;
+        });
 
-      gsap.from('.hero-sub', {
-        y: 24, opacity: 0, duration: 0.9, delay: 0.55, ease: 'power3.out'
-      });
+        tile.addEventListener('pointerleave', () => {
+          tile.style.transform = '';
+        });
 
-      gsap.from('.hero-meta span', {
-        y: 16, opacity: 0, duration: 0.7, stagger: 0.1, delay: 0.8, ease: 'power3.out'
-      });
-
-      gsap.from('.scroll-hint', {
-        opacity: 0, duration: 1, delay: 1.1, ease: 'power2.out'
+        plane.appendChild(tile);
       });
     }
 
-    /* ============================================================
-       6. BUILD THE IMAGE GLOBE
-    ============================================================ */
-    const globeInner = document.getElementById('globe-inner');
-    const globeStage = document.getElementById('globe-stage');
+    buildGallery();
 
-    const GLOBE_RADIUS = 285;
-    const LAT_ROWS = [-78, -56, -33, -11, 11, 33, 56, 78];
-    const BASE_COLS = 18;
+    /* ------------------------------------------------------------
+       SIMULATED AUDIO SYNTHESIZER (No external audio file dependencies)
+    ------------------------------------------------------------ */
+    let audioContext = null;
+    let audioEnabled = true;
 
-    let imageIndex = 0;
+    function initAudio() {
+      if (!audioContext) {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) audioContext = new AudioCtx();
+      }
+      if (audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+    }
 
-    LAT_ROWS.forEach((lat) => {
-      const cols = Math.max(4, Math.round(BASE_COLS * Math.cos(lat * Math.PI / 180)));
-      for (let c = 0; c < cols; c++) {
-        const lon = (c / cols) * 360;
+    function playSound(type) {
+      if (!audioEnabled) return;
+      initAudio();
+      if (!audioContext) return;
 
-        const item = document.createElement('div');
-        item.className = 'globe-item';
-        // Place on sphere: rotate by longitude, tilt by latitude, push outward
-        item.style.transform =
-          `rotateY(${lon}deg) rotateX(${lat}deg) translateZ(${GLOBE_RADIUS}px)`;
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
 
-        const card = document.createElement('div');
-        card.className = 'globe-card';
+      const now = audioContext.currentTime;
 
-        const img = document.createElement('img');
-        img.src = `https://picsum.photos/seed/griflan${imageIndex}/160/160`;
-        img.alt = '';
-        img.loading = 'lazy';
-        img.draggable = false;
+      if (type === 'click') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(140, now + 0.08);
+        gain.gain.setValueAtTime(0.12, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === 'swoosh') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(180, now);
+        osc.frequency.exponentialRampToValueAtTime(420, now + 0.12);
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      }
+    }
 
-        card.appendChild(img);
-        item.appendChild(card);
-        globeInner.appendChild(item);
+    function toggleAudio() {
+      audioEnabled = !audioEnabled;
+      const icon = document.getElementById('soundIcon');
+      const label = document.getElementById('soundLabel');
+      if (audioEnabled) {
+        initAudio();
+        icon.textContent = '🔊';
+        label.textContent = 'AUDIO ON';
+        playSound('click');
+      } else {
+        icon.textContent = '🔇';
+        label.textContent = 'MUTED';
+      }
+    }
 
-        // Cursor hover state on cards
-        if (isFinePointer) {
-          item.addEventListener('mouseenter', () => document.body.classList.add('hovering'));
-          item.addEventListener('mouseleave', () => document.body.classList.remove('hovering'));
+    /* ------------------------------------------------------------
+       REALTIME CLOCK & COORDINATE TELEMETRY
+    ------------------------------------------------------------ */
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getUTCHours()).padStart(2, '0');
+      const m = String(now.getUTCMinutes()).padStart(2, '0');
+      const s = String(now.getUTCSeconds()).padStart(2, '0');
+      const clockEl = document.getElementById('liveClock');
+      if (clockEl) {
+        clockEl.textContent = `${h}:${m}:${s} UTC`;
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    /* ------------------------------------------------------------
+       3D STAGE PHYSICS: DRAG + MOMENTUM + PARALLAX + LERP
+    ------------------------------------------------------------ */
+    const stage = document.getElementById('stage');
+    const posIndicator = document.getElementById('posIndicator');
+
+    // Camera and Plane state
+    const state = {
+      // Current smooth interpolated values
+      currentX: 0,
+      currentY: -20,
+      currentZ: 0,
+      rotX: 52,
+      rotY: 0,
+      
+      // Target values requested by mouse/drag/pan
+      targetX: 0,
+      targetY: -20,
+      targetZ: 0,
+      
+      // Velocity for momentum release
+      vx: 0,
+      vy: 0,
+      
+      // Mouse Parallax offset
+      mouseX: 0,
+      mouseY: 0,
+      
+      // Dragging tracking
+      isDragging: false,
+      lastPointerX: 0,
+      lastPointerY: 0,
+      hasMovedSignificantly: false,
+      
+      time: 0
+    };
+
+    // Parallax tracking
+    window.addEventListener('pointermove', (e) => {
+      const nx = (e.clientX / window.innerWidth) - 0.5;
+      const ny = (e.clientY / window.innerHeight) - 0.5;
+      state.mouseX = nx * -140; // parallax target
+      state.mouseY = ny * -90;
+    });
+
+    // Drag / Pan Events
+    stage.addEventListener('pointerdown', (e) => {
+      // Only initiate drag if not clicking modal or buttons
+      if (e.target.closest('#projectModal') || e.target.closest('button') || e.target.closest('a')) return;
+      
+      initAudio();
+      state.isDragging = true;
+      state.lastPointerX = e.clientX;
+      state.lastPointerY = e.clientY;
+      state.vx = 0;
+      state.vy = 0;
+      state.hasMovedSignificantly = false;
+      stage.setPointerCapture(e.pointerId);
+    });
+
+    stage.addEventListener('pointermove', (e) => {
+      if (!state.isDragging) return;
+      
+      const dx = e.clientX - state.lastPointerX;
+      const dy = e.clientY - state.lastPointerY;
+
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        state.hasMovedSignificantly = true;
+      }
+
+      // Drag sensitivity adjusted for isometric projection
+      state.targetX += dx * 1.3;
+      state.targetY += dy * 1.6;
+
+      // Track velocity for inertia
+      state.vx = dx * 1.3;
+      state.vy = dy * 1.6;
+
+      state.lastPointerX = e.clientX;
+      state.lastPointerY = e.clientY;
+    });
+
+    const stopDragging = (e) => {
+      if (state.isDragging) {
+        state.isDragging = false;
+        try { stage.releasePointerCapture(e.pointerId); } catch(err){}
+      }
+    };
+
+    stage.addEventListener('pointerup', stopDragging);
+    stage.addEventListener('pointercancel', stopDragging);
+
+    // Mouse wheel controls depth/zoom
+    stage.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      state.targetZ = Math.min(250, Math.max(-600, state.targetZ - e.deltaY * 0.8));
+    }, { passive: false });
+
+    function adjustZoom(delta) {
+      state.targetZ = Math.min(250, Math.max(-600, state.targetZ + delta));
+      playSound('swoosh');
+    }
+
+    function resetCamera() {
+      state.targetX = 0;
+      state.targetY = -20;
+      state.targetZ = 0;
+      state.vx = 0;
+      state.vy = 0;
+      playSound('swoosh');
+    }
+
+    /* ------------------------------------------------------------
+       60FPS ANIMATION LOOP (Physics & Fluid Spring Interpolation)
+    ------------------------------------------------------------ */
+    function renderLoop() {
+      state.time += 0.005;
+
+      // 1. Organic subtle cosmic float (sine wave idle drift)
+      const idleFloatX = Math.sin(state.time * 0.8) * 16;
+      const idleFloatY = Math.cos(state.time * 0.6) * 12;
+
+      // 2. Inertia deceleration when not dragging
+      if (!state.isDragging) {
+        state.targetX += state.vx;
+        state.targetY += state.vy;
+        state.vx *= 0.92; // Friction damping
+        state.vy *= 0.92;
+      }
+
+      // Clamp max wander to keep content within accessible boundaries
+      state.targetX = Math.max(-650, Math.min(650, state.targetX));
+      state.targetY = Math.max(-450, Math.min(300, state.targetY));
+
+      // 3. Smooth LERP toward target + parallax + float
+      const destX = state.targetX + state.mouseX + idleFloatX;
+      const destY = state.targetY + state.mouseY + idleFloatY;
+      const destZ = state.targetZ;
+
+      state.currentX += (destX - state.currentX) * 0.07;
+      state.currentY += (destY - state.currentY) * 0.07;
+      state.currentZ += (destZ - state.currentZ) * 0.08;
+
+      // Dynamic tilt based on horizontal travel
+      const targetRotY = (state.currentX / 650) * 8;
+      state.rotY += (targetRotY - state.rotY) * 0.05;
+
+      // 4. Update CSS custom properties on 3D Plane
+      plane.style.setProperty('--tx', `${state.currentX.toFixed(2)}px`);
+      plane.style.setProperty('--ty', `${state.currentY.toFixed(2)}px`);
+      plane.style.setProperty('--tz', `${state.currentZ.toFixed(2)}px`);
+      plane.style.setProperty('--rotX', `${(52 - (state.currentY * 0.015)).toFixed(2)}deg`);
+      plane.style.setProperty('--rotY', `${state.rotY.toFixed(2)}deg`);
+
+      // 5. Update Telemetry Indicator
+      if (posIndicator && Math.floor(state.time * 100) % 6 === 0) {
+        const px = Math.round(state.currentX);
+        const py = Math.round(state.currentY);
+        posIndicator.textContent = `POS: X:${px >= 0 ? '+' : ''}${px} Y:${py >= 0 ? '+' : ''}${py}`;
+      }
+
+      requestAnimationFrame(renderLoop);
+    }
+
+    // Start physics loop
+    requestAnimationFrame(renderLoop);
+
+    /* ------------------------------------------------------------
+       LIGHTBOX MODAL HANDLERS
+    ------------------------------------------------------------ */
+    const modal = document.getElementById('projectModal');
+    const modalPanel = document.getElementById('modalPanel');
+    const modalImg = document.getElementById('modalImg');
+    const modalIndex = document.getElementById('modalIndex');
+    const modalCategory = document.getElementById('modalCategory');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDesc = document.getElementById('modalDesc');
+    const modalYear = document.getElementById('modalYear');
+    const modalDeliverables = document.getElementById('modalDeliverables');
+
+    function openModal(project, index) {
+      modalImg.src = project.img;
+      modalIndex.textContent = `${String(index + 1).padStart(2, '0')} // ARCHIVE`;
+      modalCategory.textContent = project.cat;
+      modalTitle.textContent = project.title;
+      modalDesc.textContent = project.desc;
+      modalYear.textContent = project.year || '2026';
+      modalDeliverables.textContent = project.deliverables || 'Spatial Brand Experience';
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.classList.add('opacity-100', 'pointer-events-auto');
+      modalPanel.classList.remove('scale-95');
+      modalPanel.classList.add('scale-100');
+    }
+
+    function closeModal() {
+      playSound('click');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      modal.classList.remove('opacity-100', 'pointer-events-auto');
+      modalPanel.classList.add('scale-95');
+      modalPanel.classList.remove('scale-100');
+    }
+
+    // Close modal on escape key or backdrop click
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    /* ------------------------------------------------------------
+       NAVIGATION TABS
+    ------------------------------------------------------------ */
+    function navigateTab(tab) {
+      playSound('click');
+      if (tab === 'home') {
+        resetCamera();
+      } else if (tab === 'archive') {
+        // Center on grid center
+        state.targetX = -120;
+        state.targetY = -180;
+        state.targetZ = 80;
+      } else if (tab === 'info') {
+        openModal(projectsData[0], 0);
+      }
+    }
+
+    /* ------------------------------------------------------------
+       PRELOADER SEQUENCE
+    ------------------------------------------------------------ */
+    window.addEventListener('DOMContentLoaded', () => {
+      const progress = document.getElementById('loaderProgress');
+      const percent = document.getElementById('loadPercent');
+      const loadText = document.getElementById('loadText');
+      const preloader = document.getElementById('preloader');
+
+      const phases = [
+        { pct: 28, text: "CALIBRATING 3D PERSPECTIVE" },
+        { pct: 64, text: "FETCHING HIGH-RES ASSETS" },
+        { pct: 92, text: "MOUNTING INERTIAL CANVAS" },
+        { pct: 100, text: "SPATIAL SYSTEMS READY" }
+      ];
+
+      let phaseIndex = 0;
+
+      const interval = setInterval(() => {
+        if (phaseIndex < phases.length) {
+          const item = phases[phaseIndex];
+          progress.style.width = `${item.pct}%`;
+          percent.textContent = `${item.pct}%`;
+          loadText.textContent = item.text;
+          phaseIndex++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => {
+            preloader.style.opacity = '0';
+            setTimeout(() => {
+              preloader.style.visibility = 'hidden';
+              preloader.style.pointerEvents = 'none';
+            }, 800);
+          }, 350);
         }
-
-        imageIndex++;
-      }
+      }, 350);
     });
-
-    /* ============================================================
-       7. GLOBE ROTATION + DRAG INTERACTION
-    ============================================================ */
-    let rotY = 0;                 // current Y rotation (degrees)
-    let tilt = -16;               // current X tilt (degrees)
-    let velocity = 0.18;          // rotational velocity per frame
-    const AUTO_SPEED = 0.18;      // baseline auto rotation
-    let isDragging = false;
-    let lastX = 0, lastY = 0;
-
-    function animateGlobe() {
-      if (!isDragging) {
-        // Ease velocity back to the auto baseline
-        velocity += (AUTO_SPEED - velocity) * 0.025;
-        // Ease tilt back to default
-        tilt += (-16 - tilt) * 0.05;
-      }
-
-      rotY += velocity;
-
-      const scale =
-        window.innerWidth < 640 ? 0.56 :
-        window.innerWidth < 1024 ? 0.82 : 1;
-
-      globeInner.style.transform =
-        `rotateX(${tilt}deg) rotateY(${rotY}deg) scale(${scale})`;
-
-      requestAnimationFrame(animateGlobe);
-    }
-    animateGlobe();
-
-    // Drag to spin
-    if (globeStage) {
-      globeStage.addEventListener('pointerdown', (e) => {
-        isDragging = true;
-        velocity = 0;
-        lastX = e.clientX;
-        lastY = e.clientY;
-        try { globeStage.setPointerCapture(e.pointerId); } catch (_) {}
-      });
-
-      globeStage.addEventListener('pointermove', (e) => {
-        if (!isDragging) return;
-        const dx = e.clientX - lastX;
-        const dy = e.clientY - lastY;
-        rotY += dx * 0.45;
-        tilt = Math.max(-60, Math.min(40, tilt - dy * 0.3));
-        velocity = dx * 0.45;      // flick inertia
-        lastX = e.clientX;
-        lastY = e.clientY;
-      });
-
-      const endDrag = () => { isDragging = false; };
-      globeStage.addEventListener('pointerup', endDrag);
-      globeStage.addEventListener('pointercancel', endDrag);
-      globeStage.addEventListener('pointerleave', () => {
-        if (isDragging) endDrag();
-      });
-    }
-
-    /* ============================================================
-       8. SCROLL-TRIGGERED REVEALS
-    ============================================================ */
-    gsap.utils.toArray('.section-head').forEach((head) => {
-      gsap.from(head, {
-        y: 50,
-        opacity: 0,
-        duration: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: head,
-          start: 'top 88%'
-        }
-      });
-    });
-
-    gsap.utils.toArray('.project-card').forEach((card, i) => {
-      gsap.from(card, {
-        y: 70,
-        opacity: 0,
-        duration: 1.1,
-        delay: (i % 2) * 0.08,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: card,
-          start: 'top 88%'
-        }
-      });
-    });
-
-    gsap.from('.globe-head', {
-      y: 40,
-      opacity: 0,
-      duration: 1,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: '.globe-section',
-        start: 'top 70%'
-      }
-    });
-
-    gsap.from('.footer-big', {
-      y: 60,
-      opacity: 0,
-      duration: 1.1,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: 'footer',
-        start: 'top 75%'
-      }
-    });
-
-    /* ============================================================
-       9. PROJECT CARD TILT
-    ============================================================ */
-    document.querySelectorAll('.project-card').forEach((card) => {
-      card.addEventListener('pointermove', (e) => {
-        const b = card.getBoundingClientRect();
-        const rx = ((e.clientY - b.top) / b.height - 0.5) * -7;
-        const ry = ((e.clientX - b.left) / b.width - 0.5) * 7;
-        gsap.to(card, {
-          rotateX: rx,
-          rotateY: ry,
-          transformPerspective: 1000,
-          duration: 0.5,
-          ease: 'power2.out',
-          overwrite: 'auto'
-        });
-      });
-      card.addEventListener('pointerleave', () => {
-        gsap.to(card, {
-          rotateX: 0,
-          rotateY: 0,
-          duration: 0.9,
-          ease: 'elastic.out(1, 0.5)',
-          overwrite: 'auto'
-        });
-      });
-    });
-
-    /* ============================================================
-       10. MAGNETIC NAV CTA
-    ============================================================ */
-    const navCta = document.querySelector('.nav-cta');
-    if (navCta && isFinePointer) {
-      navCta.addEventListener('pointermove', (e) => {
-        const b = navCta.getBoundingClientRect();
-        gsap.to(navCta, {
-          x: (e.clientX - b.left - b.width / 2) * 0.28,
-          y: (e.clientY - b.top - b.height / 2) * 0.35,
-          duration: 0.45,
-          ease: 'power2.out'
-        });
-      });
-      navCta.addEventListener('pointerleave', () => {
-        gsap.to(navCta, {
-          x: 0, y: 0, duration: 0.7, ease: 'elastic.out(1, 0.4)'
-        });
-      });
-    }
-
-    /* ============================================================
-       11. SERVICE ROWS — ELASTIC EXPAND + MATTER.JS TAGS
-    ============================================================ */
-    document.querySelectorAll('.service').forEach((service) => {
-      const nameEl     = service.querySelector('.service-name h3');
-      const imagesWrap = service.querySelector('.service-images');
-      const imgEls     = service.querySelectorAll('.service-images .img');
-      const tagsWrap   = service.querySelector('.tags-container');
-      const tagData    = service.dataset.tags ? service.dataset.tags.split(',') : [];
-
-      // Build tag elements
-      const tagEls = tagData.map((text) => {
-        const el = document.createElement('div');
-        el.className = 'tag';
-        el.textContent = text.trim();
-        tagsWrap.appendChild(el);
-        return el;
-      });
-
-      let engine = null;
-      let runner = null;
-      let physicsTimeout = null;
-
-      service.addEventListener('mouseenter', () => {
-        // 1. Expand the row with an elastic spring
-        gsap.to(service, {
-          height: '36vh',
-          duration: 0.85,
-          ease: 'elastic.out(1, 0.55)'
-        });
-
-        // 2. Bring in the preview images
-        gsap.to(imagesWrap, {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          ease: 'power3.out',
-          delay: 0.08
-        });
-
-        gsap.to(imgEls, {
-          y: 0,
-          duration: 0.8,
-          stagger: 0.06,
-          ease: 'power3.out',
-          delay: 0.1
-        });
-
-        // 3. Switch title to cream
-        gsap.to(nameEl, {
-          color: '#f2ede3',
-          letterSpacing: '-0.02em',
-          duration: 0.5,
-          ease: 'power2.out'
-        });
-
-        // 4. Drop the physics tags after the row has mostly expanded
-        clearTimeout(physicsTimeout);
-        physicsTimeout = setTimeout(() => initTagPhysics(), 220);
-      });
-
-      service.addEventListener('mouseleave', () => {
-        // Collapse row
-        gsap.to(service, {
-          height: '20vh',
-          duration: 0.85,
-          ease: 'elastic.out(1, 0.55)'
-        });
-
-        // Hide images
-        gsap.to(imagesWrap, {
-          opacity: 0,
-          y: '100%',
-          duration: 0.45,
-          ease: 'power3.in'
-        });
-
-        gsap.to(imgEls, {
-          y: 30,
-          duration: 0.4,
-          stagger: 0.03,
-          ease: 'power2.in'
-        });
-
-        // Reset title
-        gsap.to(nameEl, {
-          color: '#ff3b30',
-          letterSpacing: '-0.045em',
-          duration: 0.45
-        });
-
-        // Fade out + destroy tags
-        tagEls.forEach((el) => {
-          gsap.to(el, { opacity: 0, scale: 0.8, duration: 0.3 });
-          el._body = null;
-        });
-
-        clearTimeout(physicsTimeout);
-        if (engine) {
-          Matter.Engine.clear(engine);
-          Matter.Runner.stop(runner);
-          engine = null;
-        }
-      });
-
-      function initTagPhysics() {
-        if (engine) {
-          Matter.Engine.clear(engine);
-          Matter.Runner.stop(runner);
-        }
-
-        const { Engine, Runner, Bodies, Composite } = Matter;
-        engine = Engine.create();
-        const world = engine.world;
-
-        const rowW = service.clientWidth;
-        const rowH = service.clientHeight;
-
-        // Floor + side walls keep tags inside the row
-        const floor = Bodies.rectangle(rowW / 2, rowH - 6, rowW, 24, {
-          isStatic: true, render: { visible: false }
-        });
-        const wallL = Bodies.rectangle(-12, rowH / 2, 24, rowH * 2, {
-          isStatic: true, render: { visible: false }
-        });
-        const wallR = Bodies.rectangle(rowW + 12, rowH / 2, 24, rowH * 2, {
-          isStatic: true, render: { visible: false }
-        });
-        Composite.add(world, [floor, wallL, wallR]);
-
-        tagEls.forEach((el, i) => {
-          const w = el.offsetWidth || 100;
-          const h = el.offsetHeight || 26;
-
-          const startX = rowW / 2 + (Math.random() - 0.5) * rowW * 0.55;
-          const startY = 12;
-
-          const body = Bodies.rectangle(startX, startY, w, h, {
-            restitution: 0.62,
-            friction: 0.45,
-            render: { visible: false }
-          });
-          Composite.add(world, body);
-
-          el._body = body;
-          el._w = w;
-          el._h = h;
-
-          // Pop the tag in
-          gsap.to(el, {
-            opacity: 1,
-            scale: 1,
-            duration: 0.45,
-            delay: i * 0.045,
-            ease: 'back.out(2.2)'
-          });
-
-          // Position sync loop (one per tag)
-          (function syncTag() {
-            if (!el._body) return;
-            const { x, y } = el._body.position;
-            el.style.left = (x - el._w / 2) + 'px';
-            el.style.top  = (y - el._h / 2) + 'px';
-            requestAnimationFrame(syncTag);
-          })();
-        });
-
-        runner = Runner.create();
-        Runner.run(runner, engine);
-      }
-    });
-
-    /* ============================================================
-       12. REDUCED MOTION RESPECT
-    ============================================================ */
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      gsap.globalTimeline.timeScale(10);
-    }
   </script>
 </body>
 </html>
