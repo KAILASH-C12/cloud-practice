@@ -1,3 +1,4 @@
+
 pipeline {
     agent any
 
@@ -8,27 +9,62 @@ pipeline {
     }
 
     stages {
+
         stage('Build image') {
             steps {
-                sh 'docker build --tag "$IMAGE_NAME:$IMAGE_TAG" .'
+                powershell '''
+                    docker build --tag "$env:IMAGE_NAME`:$env:IMAGE_TAG" .
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Docker image build failed"
+                    }
+                '''
             }
         }
 
         stage('Smoke test') {
             steps {
-                sh '''
-                    set -eu
-                    docker rm --force "$CONTAINER_NAME" >/dev/null 2>&1 || true
-                    docker run --detach --publish 18080:80 --name "$CONTAINER_NAME" "$IMAGE_NAME:$IMAGE_TAG"
-                    trap 'docker rm --force "$CONTAINER_NAME" >/dev/null 2>&1 || true' EXIT
-                    for attempt in 1 2 3 4 5; do
-                        if curl --fail --silent --show-error http://127.0.0.1:18080/ >/dev/null; then
-                            exit 0
-                        fi
-                        sleep 1
-                    done
-                    echo "Container did not serve the website on port 18080." >&2
-                    exit 1
+                powershell '''
+                    $ErrorActionPreference = "Stop"
+
+                    docker rm --force $env:CONTAINER_NAME 2>$null
+
+                    docker run --detach `
+                        --publish 18080:80 `
+                        --name $env:CONTAINER_NAME `
+                        "$($env:IMAGE_NAME):$($env:IMAGE_TAG)"
+
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Container startup failed"
+                    }
+
+                    try {
+                        $healthy = $false
+
+                        for ($attempt = 1; $attempt -le 10; $attempt++) {
+                            try {
+                                $response = Invoke-WebRequest `
+                                    -Uri "http://127.0.0.1:18080/" `
+                                    -TimeoutSec 3
+
+                                if ($response.StatusCode -eq 200) {
+                                    $healthy = $true
+                                    break
+                                }
+                            }
+                            catch {
+                                Start-Sleep -Seconds 2
+                            }
+                        }
+
+                        if (-not $healthy) {
+                            throw "Website smoke test failed"
+                        }
+
+                        Write-Host "Website is responding successfully!"
+                    }
+                    finally {
+                        docker rm --force $env:CONTAINER_NAME
+                    }
                 '''
             }
         }
@@ -36,8 +72,11 @@ pipeline {
 
     post {
         always {
-            sh 'docker rm --force "$CONTAINER_NAME" >/dev/null 2>&1 || true'
-            sh 'docker image rm "$IMAGE_NAME:$IMAGE_TAG" >/dev/null 2>&1 || true'
+            powershell '''
+                docker rm --force $env:CONTAINER_NAME 2>$null
+                docker image rm "$($env:IMAGE_NAME):$($env:IMAGE_TAG)" 2>$null
+                exit 0
+            '''
         }
     }
 }
